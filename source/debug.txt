@@ -1,5 +1,0 @@
-//debug.txt
-//For storing compile errors and internal error to fix
-
-//Compile Error and Warnings
-
