@@ -23,6 +23,7 @@ typedef unsigned long long U64;
 
 //ENUMERATION
 
+enum { ALIVE, DEAD };
 enum { PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING };
 enum {  EMPTY,
 	wqR, wqN, wqB,  wQ,  wK, wkB, wkN, wkR,
@@ -72,6 +73,12 @@ struct boardStruct
 	int side;
 	int frSq;
 	int toSq;
+
+	int oldfrSq;
+	int oldtoSq;
+
+	int oldPiece;
+	int oldVal;
 
 	int ply;
 	int oppPly;

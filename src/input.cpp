@@ -8,42 +8,40 @@
 #include "legal.h"
 
 void userEntry(boardStruct &board, bool &stop){		//Takes input and converts to file, rank.
+
 	std::string input;
-	//Display side to move;
-	if( board.side == WHITE )
-	{
-		std::cout << "White to move." << std::endl;
+
+	//Display side to move
+	if( board.side == WHITE ){
+		std::cout << "White to move.\n";
 	}
-	else if( board.side == BLACK )
-	{
-		std::cout << "Black to move." << std::endl;
+	else if( board.side == BLACK ){
+		std::cout << "Black to move.\n";
 	}
 	
 	else { std::cout << "Nothing!" << std::endl; };
+
 	//Prompt and take the users input.
-	std::cout << "Enter your move!" << std::endl;
+	std::cout << "Enter your move!\n";
 	getline( std::cin, input );
 
-	if( input == "exit" )
-	{
+	if( input == "exit" ){
 		stop = TRUE;
 		return;
 	}
+
 	//Error check for too many spaces. Will change later for castling and promotions etc.
-	if ((int)input.size()!=5)
-	{
-		std::cout << "Invalid input." << std::endl;
+	if ((int)input.size()!=5){
+		std::cout << "Invalid input.\n";
 	}
 	
 	//Error check for invalid ranks and files
-	if ( (int)input[0] > 105 || (int)input[0] < 97 || (int)input[3] > 105 || (int)input[3] < 97 ) 
-	{	
-		std::cout << "Invalid input." << std::endl;
+	if ( (int)input[0] > 105 || (int)input[0] < 97 || (int)input[3] > 105 || (int)input[3] < 97 ){ 	
+		std::cout << "Invalid input.\n";
 	}
 
-	if(( (int)input[1] < 49) ||( (int)input[1] > 57) ||( (int)input[4] < 49) ||( (int)input[4] > 57) )
-	{
-		std::cout << "Invalid input." << std::endl;
+	if(( (int)input[1] < 49) ||( (int)input[1] > 57) ||( (int)input[4] < 49) ||( (int)input[4] > 57) ){
+		std::cout << "Invalid input.\n";
 	}
 	nl(9);
 
@@ -76,7 +74,7 @@ void userEntry(boardStruct &board, bool &stop){		//Takes input and converts to f
 void userInput(boardStruct &board, pieceStruct pieces[], bool &stop){
 	userEntry(board, stop);
 	if( stop ) return;
-	while( !checkLegal(board, stop) ){
+	while( !checkLegal(board, pieces, stop) ){
 		displayAll(board);
 		userEntry(board, stop);
 		if( stop ) return;

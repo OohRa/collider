@@ -8,7 +8,7 @@ EXECUTABLE = collider
 
 CXX = clang++
 
-CXXFLAGS = -Wall -Wextra -pedantic -c -std=c++11 -I../headers/  
+CXXFLAGS = -Wall -Wextra -pedantic -c -std=c++11 -I../include/  
 
 LDFLAGS = $(SDL)
 

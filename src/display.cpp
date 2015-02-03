@@ -5,20 +5,17 @@
 #include "primer.h"
 #include "display.h"
 
-void displayHeader()
-{
+void displayHeader(){
 	int count = 0;
-	for( count = 0; count < 1000; count++)
-	{
+	for( count = 0; count < 1000; count++){
 		nl(1);
 		stars(60);
 	}
 }
 
 void displayBoard(boardStruct &board){
-	int rank = RANK_8;
-	int file = FILE_A;
-	int square120 = 0;
+	int rank, file, square120, piece;
+	std::string showPiece;
 
 	nl(1);
 	stars(60);
@@ -29,18 +26,14 @@ void displayBoard(boardStruct &board){
 	nl(2);
 
 	//Display board as symbols
-	printf("Board with piece symbols\n\n");		
 	spaces(15);
-	for( rank = RANK_8; rank >= RANK_1; rank--)
-	{
-		for( file = FILE_A; file <= FILE_H; file++)
-		{
+	printf("Board\n\n");		
+	spaces(15);
+	for( rank = RANK_8; rank >= RANK_1; rank--){
+		for( file = FILE_A; file <= FILE_H; file++){
 			square120 = FR2SQ(file,rank);
-			int piece = 0;
 			piece = board.sq120[square120];
-			std::string showPiece = "0";
-			switch ( piece )
-			{
+			switch ( piece ){
 				case  0: showPiece = "*"; break;
 				case  1:
 				case  8: showPiece = "R"; break;
@@ -89,32 +82,25 @@ void displayBoard(boardStruct &board){
 	stars(60);
 	nl(1);
 	stars(60);
-	nl(1);
-	
+	nl(30);	
 
 }
 
-void displayBitboard( U64 bbDisplay )
-{
+void displayBitboard( U64 bbDisplay ){
 	/* Fills the display Array */
-
 	int displayArray[64];
+	int firstBit, count;
 	U64 garbage;
 	garbage = bbDisplay;
-	int firstBit = 0;	
 	
-	for( int index = 0; index < 64; index++ )
-	{
+	for( int index = 0; index < 64; index++ ){
 		firstBit = (garbage % 2 );
 		displayArray[index] = firstBit;
 		garbage >>= 1;
 	}
 
-	int count = 0;
-	for( int rank = RANK_8; rank >= RANK_1; rank-- )
-	{
-		for( int file = FILE_A; file <= FILE_H; file++ )
-		{
+	for( int rank = RANK_8; rank >= RANK_1; rank-- ){
+		for( int file = FILE_A; file <= FILE_H; file++ ){
 			count = FR2SQ64( file, rank );
 			std::cout << displayArray[count] << " ";	
 		}
@@ -124,43 +110,28 @@ void displayBitboard( U64 bbDisplay )
 }
 
 int displayGraphics(){
-
-
 return 0;
-
 }
 
-void displayAll(boardStruct &board)
-{
-
+void displayAll(boardStruct &board){
 //	displayHeader();
 	displayBoard(board);
-
 }
 
-void nl(int lines)
-{
-	int lineCount = 0;
-	for(lineCount = 0; lineCount < lines; lineCount++)
-	{
+void nl(int lines){
+	for(int lineCount = 0; lineCount < lines; lineCount++){
 		printf("\n");
 	}
 }
 
-void stars(int stars)
-{
-	int starCount = 0;
-	for( starCount = 0; starCount < stars; starCount++)
-	{
+void stars(int stars){
+	for( int starCount = 0; starCount < stars; starCount++){
 		printf("*");
 	}
 }
 
-void spaces(int spaces)
-{
-	int spaceCount = 0;
-	for( spaceCount = 0; spaceCount < spaces; spaceCount++)
-	{
+void spaces(int spaces){
+	for( int spaceCount = 0; spaceCount < spaces; spaceCount++){
 		printf(" ");
 	}
 }

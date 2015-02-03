@@ -5,6 +5,7 @@
 #include "primer.h"
 #include "debug.h"
 #include "display.h"
+#include "board.h"
 
 void boardDebug( boardStruct &board, pieceStruct pieces[] ){
 
@@ -13,13 +14,10 @@ void boardDebug( boardStruct &board, pieceStruct pieces[] ){
 	//Printing both boards for debugging
 	
 	printf("Board64 by file and rank.\n\n");
-	for( rank = RANK_8; rank >= RANK_1; rank--)
-	{
-		for( file = FILE_A; file <= FILE_H; file++)
-		{
+	for( rank = RANK_8; rank >= RANK_1; rank--){
+		for( file = FILE_A; file <= FILE_H; file++){
 			square64 = FR2SQ64(file, rank);
-			if( board.sq64[square64] < 10 )
-			{
+			if( board.sq64[square64] < 10 ){
 				spaces(1);
 			}	
 			printf("%d ", board.sq64[square64]);
@@ -32,13 +30,10 @@ void boardDebug( boardStruct &board, pieceStruct pieces[] ){
 
 		//Change board.sq120 to output all squares in right order	
 	printf("Board120 by file and rank.\n\n");
-	for( rank = RANK_8; rank >= RANK_1; rank--)
-	{
-		for( file = FILE_A; file <= FILE_H; file++)
-		{
+	for( rank = RANK_8; rank >= RANK_1; rank--){
+		for( file = FILE_A; file <= FILE_H; file++){
 			square120 = FR2SQ( file , rank);
-			if( board.sq120[square120] < 10 )
-			{
+			if( board.sq120[square120] < 10 ){
 				spaces(1);
 			}
 			printf("%d ", board.sq120[square120]);
@@ -50,8 +45,7 @@ void boardDebug( boardStruct &board, pieceStruct pieces[] ){
 	nl(1);
 
 	
-	for( int index = 1; index <= 32; index++)
-	{
+	for( int index = 1; index <= 32; index++){
 		printf("%d ", pieces[index].position);
 		nl(1);
 	}		
@@ -60,8 +54,7 @@ void boardDebug( boardStruct &board, pieceStruct pieces[] ){
 
 
 
-void bitboardDebug()
-{
+void bitboardDebug(){
 	/* Displays bitboards for debugging */
 /*
 	cout << "\"White Rooks\"" << endl;
@@ -110,8 +103,7 @@ void bitboardDebug()
 	
 	garbage = whiteRooks;
 	
-	for( int index = 0; index < 63; index++ )	
-	{
+	for( int index = 0; index < 63; index++ ){
 		firstBit = ( garbage % 2 );
 		if( firstBit == 1 )	
 			bbReverse++;
@@ -136,8 +128,7 @@ void bitboardDebug()
 	int bigChange = 0;
 	int garbage = whitePieces;	
 
-	for( int index = 0; index < 32; index++ )
-	{
+	for( int index = 0; index < 32; index++ ){
 		smallMod = pow( 2, smallExp );		
 		bigMod = pow( 2, bigExp );
 		smallChange = smallMod - 1;
@@ -146,19 +137,17 @@ void bitboardDebug()
 		firstBit = ( garbage % smallMod );
 		lastBit = ( garbage % bigMod );
 	
-		if( lastBit == 1 )
-		{
-			if( firstBit == 0 )
-			{	garbage += smallChange;
+		if( lastBit == 1 ){
+			if( firstBit == 0 ){
+				garbage += smallChange;
 				garbage -= bigChange;	
 			}
-		else
-		{
-			if( firstBit == 1 )
+		else{
+			if( firstBit == 1 ){
 				garbage -= smallChange;
 				garbage += bigChange;
 			
-		}
+			}
 		}
 		smallMod++;
 		bigMod--;
@@ -172,16 +161,14 @@ void bitboardDebug()
 	garbage = whiteRooks;
 	int firstBit = 0;	
 	
-	for( int index = 0; index < 63; index++ )
-	{
+	for( int index = 0; index < 63; index++ ){
 		firstBit = (garbage % 2 );
 		displayArray[index] = firstBit;
 		garbage >>= 1;
 	}
 
 	int count = 0;
-	for( int rank = RANK_8; rank >= RANK_1; rank-- )
-	{
+	for( int rank = RANK_8; rank >= RANK_1; rank-- ){
 		for( int file = FILE_A; file <= FILE_H; file++ )
 		{
 			count = FR2SQ64( file, rank );
@@ -191,4 +178,16 @@ void bitboardDebug()
 	} 
 */	
 }
+/*
+void checkDebug( boardStruct &board, pieceStruct pieces[] ){
+	for( int index = 0; index < 64; index++ ){
+		std::cout << checkColor( board.sq120 ) << std::endl;		
+	
+}
 
+void debugAll( boardStruct &board, pieceStruct pieces[] ){
+	boardDebug( boardStruct &board, pieceStruct pieces[] );
+	//bitboardDebug();
+	checkDebug( board, pieces );
+}
+*/

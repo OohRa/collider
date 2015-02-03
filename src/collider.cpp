@@ -9,20 +9,13 @@
 #include "move.h"
 #include "debug.h"
 
-int main()
-{
-	
+int main(){	
 	/* Main game loop */
-
 	initializeAll(board, pieces, indexArray, bb);
 	displayAll(board);
 	while( !stop ){
 		userInput(board, pieces, stop);
 	}	
-	
-
-
-
 	//Debugging
 /*
 	initializeAll( board, pieces, indexArray, bb );
