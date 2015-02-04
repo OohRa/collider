@@ -10,6 +10,7 @@
 #include "primer.h"
 #include "legal.h"
 #include "board.h"
+#include "move.h" 
 
 /* Check if the user or cpu move is legal */
 bool checkLegal(boardStruct &board, pieceStruct pieces[], bool &stop){
@@ -290,13 +291,94 @@ bool checkLegal(boardStruct &board, pieceStruct pieces[], bool &stop){
 	return true;
 
 }
-
+/*  checkCheck function
+ *  checks if the users move put his own king in check
+ *  not if he put the opponents king in check.
+ *  Search code (FCC)					 */
 bool checkCheck(boardStruct &board, pieceStruct pieces[]){
-int kingSq;
-kingSq = board.toSq;
-kingSq = pieces[32].position;
-return false;
+	
+	int kingSq, slide, index, toColor, toType, checkSq;
+
+	int knightLegal[8] = { 21, 12, -8, -19, -21, -12, 8, 19 };	
+	int moveDir[9] = { UP, UPRT, RT, DWNRT, DWN, DWNLEFT, LEFT, UPLEFT, BREAK };
+
+	makeMove( board, pieces );
+
+	(board.side == WHITE) ? kingSq = pieces[wK].pos: kingSq = pieces[bK].pos;
+	
+	index = 0;
+	/* Check the direction of movement */
+	for( slide = moveDir[index]; slide != BREAK; index++ ){
+		checkSq = 0;
+		slide = moveDir[index];
+		if( slide == BREAK ) break;
+		for( int indexSq = (kingSq + slide); checkSq != OFFBOARD; indexSq += slide ){ 
+			checkSq = board.sq120[indexSq];
+			toColor = checkColor( checkSq );
+			toType = checkType ( checkSq );
+				
+			if( checkSq == OFFBOARD ){
+				break;
+			}
+
+			else if( toColor == board.side ){	
+				break;
+			}
+			
+			else if( toColor != board.side ){
+				
+				if( (abs(indexSq - kingSq) == 9 || abs(indexSq - kingSq) == 11) && toType == PAWN ){
+					if( board.side == WHITE ){
+						if( (indexSq - kingSq) > 0 ){
+							std::cout << "Invalid move. You are in check by pawn.\n";
+							unmakeMove( board, pieces );
+							return true;
+						}
+					}
+					else if( board.side == BLACK ){
+						if( (indexSq - kingSq) < 0 ){
+							std::cout << "Invalid move. You are in check by pawn\n Black to move";
+							unmakeMove( board, pieces );
+							return true;
+						}
+					}
+				}
+				if( toType == BISHOP || toType == QUEEN ){
+					if( abs(slide) % 9 == 0 || abs(slide) % 11 == 0 ){
+						std::cout << "Invalid move. You are in check by bishop or queen.\n";
+						unmakeMove( board, pieces );
+						return true;
+					}
+				}
+				if( toType == ROOK || toType == QUEEN ){
+					if( abs(slide) % 10 == 0 || slide == RT || slide == LEFT ){
+						std::cout << "Invalid move. You are in check by rook or queen\n";
+						unmakeMove( board, pieces );
+						return true;
+					}
+				}
+			}
+		}
+	}
+					
+	for( int index = 0; index < 8; index++ ){
+		int checkSq = (board.sq120[kingSq + knightLegal[index]]);
+		int toColor, toType;
+
+		toColor = checkColor( checkSq );
+		toType = checkType( checkSq );
+
+		if( (toColor != board.side) && (toType == KNIGHT) ){
+			std::cout << "Invalid move. That knight put you in check!\n"; 
+			unmakeMove( board, pieces );
+			return true;
+		}
+	}
+	unmakeMove( board, pieces );
+	return false;	
 
 }
+	
+
 
 
