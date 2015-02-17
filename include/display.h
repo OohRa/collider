@@ -4,11 +4,10 @@
 
 //Functions
 void displayHeader();
-void displayBoard( boardStruct &board );
-void displayBitboard( U64 bbDisplay );
+void displayBoard();
+void displayBitboard();
 int displayGraphics();
-void displayAll( boardStruct &board );
+void displayAll();
 void nl( int lines );
-void stars( int stars );
-void spaces( int spaces );
+void stars( int num, char fill );
 #endif

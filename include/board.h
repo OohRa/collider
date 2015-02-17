@@ -2,7 +2,8 @@
 #define BOARD_H
 //board.h
 
-int checkColor( int sqVal );
-int checkType( int piece );
+int getColor( int sq );
+int getType( int sq );
+int getPiece( int sq );
 
 #endif

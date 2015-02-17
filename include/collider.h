@@ -6,10 +6,5 @@
 
 
 //GLOBALS
-pieceStruct pieces[33];
-boardStruct board;
-bitboardStruct bb;
-indexStruct indexArray;
-bool stop;
 
 #endif

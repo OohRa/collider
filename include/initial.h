@@ -3,10 +3,10 @@
 //initial.h
 
 //Functions
-void initialIndexes( indexStruct &indexArray );
-void initialBoard( boardStruct &board );
-void initialPieces( pieceStruct pieces[], boardStruct &board );
-void initialBitboards( bitboardStruct &bb, pieceStruct pieces[] );
-int initialSDL(  );
-void initializeAll( boardStruct &board, pieceStruct pieces[], indexStruct &indexArray, bitboardStruct &bb );
+void initialIndexes();
+void initialBoard();
+void initialPieces();
+void initialBitboards();
+int initialSDL();
+void initializeAll();
 #endif 

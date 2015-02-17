@@ -5,9 +5,9 @@
 
 
 //Functions
-void makeMove(boardStruct &board, bool &stop);
+void makeMove();
 void unmakeMove();
-
+void changeSide();
 
 
 

@@ -9,7 +9,7 @@
 
 
 //CONSTANTS
-
+extern int life;
 //DEFINITIONS
 
 #define NAME "Collider 0.1"
@@ -18,13 +18,13 @@
 #define startFen "rnbqkbnr/pppppppp/8/8/8/8/pppppppp/RNBQKBNR w KQkq - 0 1"
 
 typedef unsigned long long U64;
-//Initialization
 
 
 //ENUMERATION
 
+enum { UP = 10, UPRT = 11, RT = 1, DWNRT = -9, DWN = -10, DWNLEFT = -11, LEFT = -1, UPLEFT = 9, BREAK = 99 };
 enum { ALIVE, DEAD };
-enum { PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING };
+enum { NOTYPE, PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING };
 enum {  EMPTY,
 	wqR, wqN, wqB,  wQ,  wK, wkB, wkN, wkR,
 	wPa, wPb, wPc, wPd, wPe, wPf, wPg, wPh,
@@ -39,7 +39,7 @@ enum { RANK_1, RANK_2, RANK_3, RANK_4, RANK_5, RANK_6, RANK_7, RANK_8, RANK_NONE
 
 /* Constants for colors */
 
-enum { NONE, WHITE, BLACK, };
+enum { NONE, WHITE, BLACK };
 
 /* Constants for every square */
 
@@ -85,21 +85,25 @@ struct boardStruct
 
 	int kingSq;
 	
-	int sq120[SQNUM];
+	int sq[SQNUM];
 	int sq64[64];
+
+	bool castling;
+	int enPas;
 };	
 
 struct pieceStruct
 {
-	int position;
-	int position64;
+	int pos;
+	int pos64;
 	int color;
 	int type;
 	int value;
 	bool alive;
 	U64 bitboard;
 	int movelistSize;
-} ;
+	int moved;
+};
 
 struct bitboardStruct 
 {
@@ -129,9 +133,16 @@ struct bitboardStruct
 struct indexStruct
 {
 	
-	int sq120[SQNUM];
+	int sq[SQNUM];
 	int sq64[64];
 };
+
+//Globals
+extern boardStruct board;
+extern pieceStruct pieces[33];
+extern indexStruct indexArray;
+extern bitboardStruct bb;
+extern bool stop;
 
 //MACROS
 

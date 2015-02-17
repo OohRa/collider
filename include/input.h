@@ -3,7 +3,8 @@
 //input.h
 
 //Functions
-void userEntry(boardStruct &board, bool &stop);
-void userInput(boardStruct &board, pieceStruct pieces[], bool &stop);
+bool userEntry();
+void userInput();
+void getInput();
 
 #endif
