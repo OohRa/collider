@@ -4,35 +4,43 @@
 #include <iostream>
 #include "primer.h"
 #include "display.h"
+#include "board.h"
+
+void nl(int lines){
+	for(int lineCount = 0; lineCount < lines; lineCount++){
+		printf("\n");
+	}
+}
+
+void fill(int num, char fill){
+	for( int fillCount = 0; fillCount < num; fillCount++){
+		std::cout << fill;
+	}
+}
 
 void displayHeader(){
 	int count = 0;
 	for( count = 0; count < 1000; count++){
 		nl(1);
-		stars(60);
+		fill(60, '*');
 	}
 }
-
-void displayBoard(boardStruct &board){
-	int rank, file, square120, piece;
+//FDB
+void displayBoard(){
+	int rank, file, square120, piece, color;
 	std::string showPiece;
-
-	nl(1);
-	stars(60);
-	nl(1);
-	stars(60);
-	nl(1);
-	stars(60);
-	nl(2);
-
+	color = 0;
 	//Display board as symbols
-	spaces(15);
 	printf("Board\n\n");		
-	spaces(15);
+	fill( 15, ' ' );
+	fill( 44, '$' );
+	nl(1);
+	fill( 15, ' ' );
+	std::cout << "$|";
 	for( rank = RANK_8; rank >= RANK_1; rank--){
 		for( file = FILE_A; file <= FILE_H; file++){
 			square120 = FR2SQ(file,rank);
-			piece = board.sq120[square120];
+			piece = board.sq[square120];
 			switch ( piece ){
 				case  0: showPiece = "*"; break;
 				case  1:
@@ -69,28 +77,44 @@ void displayBoard(boardStruct &board){
 				case 32: showPiece = "p"; break;
 				default: printf(" ERROR ");
 			}
-			
-			spaces(1);	
+			color++;
+			//Only Use parentheses if square has a piece on it
+			if( showPiece != "*" ){
+				if( getColor(square120) == WHITE ){
+				 std::cout << "|(" << showPiece << ")|";
+				}
+				else std::cout << "|[" << showPiece << "]|";
+			}
+			else{	
+			std::cout << "| ";
 			std::cout << showPiece;
+			std::cout << " |";
+			}
+			
 		}
-		nl(1);
-		spaces(15);
+		std::cout << "|$\n";
+		fill(15, ' ');
+		if( rank != RANK_1 ){
+			std::cout << "$||";
+			fill(38, ' ');
+			std::cout << "||$";
+			nl(1);
+			fill( 15, ' ' );
+			std::cout << "$|";
+		}
+		color--;
 	}
+	fill(44, '$');
 	nl(1);
-	stars(60);
-	nl(1);
-	stars(60);
-	nl(1);
-	stars(60);
-	nl(30);	
-
 }
 
-void displayBitboard( U64 bbDisplay ){
+//FDBB
+void displayBitboard(){
 	/* Fills the display Array */
 	int displayArray[64];
 	int firstBit, count;
 	U64 garbage;
+	U64 bbDisplay = 0;
 	garbage = bbDisplay;
 	
 	for( int index = 0; index < 64; index++ ){
@@ -109,29 +133,14 @@ void displayBitboard( U64 bbDisplay ){
 
 }
 
+//FDG
 int displayGraphics(){
 return 0;
 }
 
-void displayAll(boardStruct &board){
+//FDA
+void displayAll(){
 //	displayHeader();
-	displayBoard(board);
+	displayBoard();
 }
 
-void nl(int lines){
-	for(int lineCount = 0; lineCount < lines; lineCount++){
-		printf("\n");
-	}
-}
-
-void stars(int stars){
-	for( int starCount = 0; starCount < stars; starCount++){
-		printf("*");
-	}
-}
-
-void spaces(int spaces){
-	for( int spaceCount = 0; spaceCount < spaces; spaceCount++){
-		printf(" ");
-	}
-}
