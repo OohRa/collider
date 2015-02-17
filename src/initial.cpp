@@ -7,15 +7,24 @@
 #include <iostream>
 #include "board.h"
 
-void initialIndexes(indexStruct &indexArray){				//Initializes inital board
+boardStruct board;
+pieceStruct pieces[33];
+indexStruct indexArray;
+bitboardStruct bb;
+bool stop;
+
+//FII
+void initialIndexes(){				//Initializes inital board
 	int file, rank, square, square64, index;
 
 	for( index = 0; index < SQNUM; index++){		//Sets all squares to -1
-		indexArray.sq120[index] = -1;
+		indexArray.sq[index] = -1;
+		life++;
 	}
 
 	for( index = 0; index < 64; index++){
 		indexArray.sq64[index] = -1;
+		life++;
 	}
 
 	square64 = 0;
@@ -23,24 +32,27 @@ void initialIndexes(indexStruct &indexArray){				//Initializes inital board
 	
 		for( file = FILE_A; file <= FILE_H; file++){
 			square = FR2SQ(file,rank);
-			indexArray.sq120[square] = square64;
+			indexArray.sq[square] = square64;
 			indexArray.sq64[square64] = square;
 			square64++;
+			life++;
 		}
 	}
 }
 
-void initialBoard(boardStruct &board){
+void initialBoard(){
 	int file, rank, square64, square120, piece, index, count;
 	board.side = WHITE;
 
 	//Initialize starting board set
 	for( index = 0; index < 64; index++){
 		board.sq64[index] = -1;
+		life++;
 	}
 
 	for( index = 0; index < SQNUM; index++){
-		board.sq120[index] = -1;
+		board.sq[index] = -1;
+		life++;
 	}
 	
 	board.sq64[0]  = wqR;
@@ -64,16 +76,19 @@ void initialBoard(boardStruct &board){
 	for( count = wPa; count <= wPh; count++ ){		//Fills in initial white pawns
 		board.sq64[index] = count;
 		index++;
+		life++;
 	}
 
 	index = 48;
 	for( count = bPa; count <= bPh; count++ ){		//Fills in initial black pawns
 		board.sq64[index] = count;
 		index++;
+		life++;
 	}
 	
 	for( index = 16; index <= 47; index++ ){		//Fills in initial empty squares
 		board.sq64[index] = 0;
+		life++;
 	}	
 
 	for( rank = RANK_8; rank >= RANK_1; rank--){		//Fills in 120 board from 64 board
@@ -81,13 +96,14 @@ void initialBoard(boardStruct &board){
 			square64 = FR2SQ64(file, rank);
 			square120 = FR2SQ(file, rank);
 			piece = board.sq64[square64];
-			board.sq120[square120] = piece;
+			board.sq[square120] = piece;
+			life++;
 		}
 	}
 }
 
 /* Initialize piecelist from board */
-void initialPieces(pieceStruct pieces[], boardStruct &board){
+void initialPieces(){
 
 	int piece, rank, file, square64, square;
 
@@ -96,19 +112,24 @@ void initialPieces(pieceStruct pieces[], boardStruct &board){
 			square = FR2SQ( file, rank );
 			square64 = FR2SQ64(file, rank);
 			piece = board.sq64[square64];
+			life++;
 			if( piece != 0 ){
-				pieces[piece].position = square;
+				pieces[piece].pos = square;
 				pieces[piece].bitboard = 0;
 				pieces[piece].bitboard++;
 				pieces[piece].bitboard <<= square64;
-				pieces[piece].color = checkColor(piece);
-				pieces[piece].type  = checkType(piece);
+				pieces[piece].color = getColor(square);
+				pieces[piece].type  = getType(square);
+			}
+			else if( piece == 0 ){
+				pieces[piece].color = NONE;	
+				pieces[piece].type = NOTYPE;
 			}
 		}
 	}
 }
 
-void initialBitboards(bitboardStruct &bb, pieceStruct pieces[]){			//Hopefully initializes bitboards 
+void initialBitboards(){			//Hopefully initializes bitboards 
 
 	//Initialize all bitboards (figure out attacking bitboards and put in pieceStruct)
 	//Clear bitsets by setting to 0 then filling with data from piecelist
@@ -180,6 +201,7 @@ void initialBitboards(bitboardStruct &bb, pieceStruct pieces[]){			//Hopefully i
 	 
 	bb.occupiedSquares = bb.blackPieces | bb.whitePieces;
 	bb.emptySquares = ~bb.occupiedSquares;
+	life++;
 	
 }
 /*
@@ -216,10 +238,11 @@ int initialSDL()
 	return 0;
 }
 */
-void initializeAll(boardStruct &board, pieceStruct pieces[], indexStruct &indexArray, bitboardStruct &bb ){
-	initialIndexes(indexArray);
-	initialBoard(board);
-	initialPieces(pieces, board);
-	initialBitboards(bb, pieces);
+void initializeAll(){
+	initialIndexes();
+	initialBoard();
+	initialPieces();
+	initialBitboards();
 //	initialSDL();
+	life++;
 }
