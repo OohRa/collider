@@ -1,0 +1,10 @@
+g2 g4
+g8 f6
+g4 g5
+h7 h5
+g5 h6
+h8 g8
+h6 h7
+e7 e6
+h7 h8
+exit
