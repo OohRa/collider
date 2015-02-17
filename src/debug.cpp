@@ -7,7 +7,7 @@
 #include "display.h"
 #include "board.h"
 
-void boardDebug( boardStruct &board, pieceStruct pieces[] ){
+void boardDebug(){
 
 	int rank, file, square64, square120;
 
@@ -18,35 +18,31 @@ void boardDebug( boardStruct &board, pieceStruct pieces[] ){
 		for( file = FILE_A; file <= FILE_H; file++){
 			square64 = FR2SQ64(file, rank);
 			if( board.sq64[square64] < 10 ){
-				spaces(1);
 			}	
 			printf("%d ", board.sq64[square64]);
 		}
 		nl(1);
 	}
 	nl(1);
-	stars(30);
 	nl(1);
 
-		//Change board.sq120 to output all squares in right order	
+		//Change board.sq to output all squares in right order	
 	printf("Board120 by file and rank.\n\n");
 	for( rank = RANK_8; rank >= RANK_1; rank--){
 		for( file = FILE_A; file <= FILE_H; file++){
 			square120 = FR2SQ( file , rank);
-			if( board.sq120[square120] < 10 ){
-				spaces(1);
+			if( board.sq[square120] < 10 ){
 			}
-			printf("%d ", board.sq120[square120]);
+			printf("%d ", board.sq[square120]);
 		}
 		nl(1);
 	}
 	nl(1);	
-	stars(60);
 	nl(1);
 
 	
 	for( int index = 1; index <= 32; index++){
-		printf("%d ", pieces[index].position);
+		printf("%d ", pieces[index].pos);
 		nl(1);
 	}		
 	
@@ -178,16 +174,32 @@ void bitboardDebug(){
 	} 
 */	
 }
-/*
-void checkDebug( boardStruct &board, pieceStruct pieces[] ){
-	for( int index = 0; index < 64; index++ ){
-		std::cout << checkColor( board.sq120 ) << std::endl;		
-	
+
+/* Search Code (FCD) */
+void checkDebug(){
+	int square;
+	for( int rank = RANK_8; rank >= RANK_1; rank-- ){
+		for( int file = FILE_A; file <= FILE_H; file++){
+			square = FR2SQ(file, rank);
+			std::cout << getColor( board.sq[square] );		
+		}
+		nl(1);
+	}
+
+	nl(5);
+
+	for( int index = 0; index < 32; index++ ){
+		std::cout << pieces[index].color;
+		nl(1);
+	}
 }
 
-void debugAll( boardStruct &board, pieceStruct pieces[] ){
-	boardDebug( boardStruct &board, pieceStruct pieces[] );
+/* debugAll function
+ * Used for general debugging 
+ * Search Code (FDA)		*/
+void debugAll(){
+//	boardDebug( board, pieces );
 	//bitboardDebug();
-	checkDebug( board, pieces );
+	checkDebug();
 }
-*/
+
