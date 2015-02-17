@@ -3,14 +3,27 @@
 #include "primer.h"
 #include "board.h"
 
-int checkColor( int sqVal ){
+
+int getPiece( int sq ){
+	return board.sq[sq];
+}	
+
+int getColor( int sq ){
+	int sqVal;
+	sqVal = getPiece( sq );
+
 	if( sqVal >= wqR && sqVal <= wPh ) return WHITE;
 	else if( sqVal >= bqR && sqVal <= bPh ) return BLACK;
-	else	return NONE;
+	else if( sqVal == 0 )
+		return NONE;
+	else return OFFBOARD;
 }
 
-int checkType ( int piece ){
-	int type;
+int getType ( int sq ){
+	int type, piece;
+	
+	piece = getPiece( sq );
+
 	//Check what type the piece is.
 	switch ( piece ){
 		case wqR:
@@ -31,5 +44,9 @@ int checkType ( int piece ){
 		case  bK: type = KING; break;
 		default: type = PAWN; break;
 	}
+	if( piece == 0 ) type = EMPTY;
+	
+	if( piece == -1 ) type = OFFBOARD;
 	return type;
 }
+
