@@ -4,7 +4,7 @@
 #include "primer.h"
 #include "move.h"
 #include "board.h"
-
+//(VMM)
 void makeMove(){
 
 	int piece, toVal;
@@ -27,6 +27,9 @@ void makeMove(){
 			kingTo = board.oldtoSq - 1;
 		}
 		rook = board.sq[rookFrom];
+		board.oldtoSq = rookTo;
+		board.storePiece = rook;
+		board.storeSq = rookFrom;
 		board.oldPiece = king;
 		board.oldVal = rook;
 		board.sq[board.oldfrSq] = EMPTY;
@@ -55,20 +58,31 @@ void makeMove(){
 		if( getType(board.toSq) == PAWN && (board.toSq > 91 || board.toSq < 31) ){
 			board.sq[board.toSq] = (board.side = WHITE) ? wQ : bQ;
 		} 
-
+		std::cout << "Test before enPassant capture.\n";
+		std::cout << "board.enPas\n" << board.enPas << "\n";
+		std::cout << "board.toSq\n" << board.toSq << "\n";
+		std::cout << "getType(board.toSq)\n" << getType(board.toSq) << "\n";
+		std::cout << "getType(board.enPas)\n" << getType(board.enPas) << "\n";
+		std::cout << "PAWN\n" << PAWN << "\n";
 		//Remove the capture enPassant pawn
 		if( board.enPas == board.toSq && getType(board.toSq) == PAWN){
-			int enPiece;
+			int enPiece, enSq;
+			std::cout << "Test in enPassant capture.\n";
 			if( diff > 0 ){
 				enPiece = board.sq[board.toSq - 10];
+				enSq = board.toSq - 10;
 				board.sq[board.toSq - 10] = EMPTY;
 				pieces[enPiece].pos = DEAD;
 			}
 			else {
+				enSq = board.toSq + 10;
 				enPiece = board.sq[board.toSq + 10];
 				board.sq[board.toSq + 10] = EMPTY;
 				pieces[enPiece].pos = DEAD;
 			}
+			board.storePiece = enPiece;
+			board.storeSq = enSq;
+			board.enpasFlag = true;
 		}
 
 		/* Update piecelist */
@@ -86,12 +100,9 @@ void makeMove(){
 		//Debug
 		std::cout << "Test from enpassant creation: " << board.enPas << "\n";
 	}
-	else board.enPas = 0;
-
-
 }
 
-
+//(VUM)
 void unmakeMove(){
 
 	if( !board.castling ){
@@ -103,11 +114,34 @@ void unmakeMove(){
 	pieces[board.oldVal].pos = board.toSq;
 	pieces[board.oldPiece].pos = board.frSq;
 	pieces[board.oldPiece].moved--;
+	if( getType(board.frSq) == PAWN && getType(board.toSq) == EMPTY && abs(board.toSq - board.frSq) == 11){
+		std::cout << "Inside restore enpassant pawn.\n";
+		board.sq[board.storeSq] = board.storePiece;
+		pieces[board.storePiece].pos = board.storeSq;
 	}
-	
-		
+	}
+	else if( board.castling ){
+		int kingSq, diff;
+		(board.side == WHITE) ? kingSq = pieces[wK].pos: kingSq = pieces[bK].pos;
+		board.sq[board.toSq] = EMPTY;
+		board.sq[board.frSq] = board.oldPiece;
+		board.sq[board.storeSq] = board.storePiece;
+		diff = board.toSq - board.frSq;
+		if( diff > 0 ) board.sq[board.frSq + 1] = EMPTY;
+		else board.sq[board.frSq - 1] = EMPTY;
+
+		pieces[board.storePiece].pos = board.toSq;
+		pieces[board.oldPiece].pos = board.frSq;
+		pieces[board.oldPiece].moved--;
+		pieces[board.storePiece].moved--;
+	/*	if( getType(kingSq + 1) == ROOK && getColor(kingSq + 1) == board.side){
+			board	
+		{	*/	
+	}
+
 }
 
 void changeSide(){	
 	(board.side == WHITE) ? board.side = BLACK : board.side = WHITE;
+	board.enpasFlag = false;
 }
