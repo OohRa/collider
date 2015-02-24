@@ -10,16 +10,17 @@
 #include "move.h"
 #include "debug.h"
 #include "board.h"
+#include "sdl.h"
 
 int life;
 
 int main(){	
 
-	life = 0;
-
 	/* Main game loop */
-
 	initializeAll();
+	//Debug
+//	debugAll();
+
 	displayAll();
 	while( !stop ){
 		userInput();
@@ -28,6 +29,7 @@ int main(){
 		changeSide();
 		displayAll();	
 	}
+
 
 
 
@@ -68,9 +70,12 @@ int main(){
 */
 	//Debugging
 /*
-	initializeAll( board, pieces, indexArray, bb );
-	debugAll( board, pieces );
+	initializeAll();
+	debugAll();
 */
+
+	closeSDL();
+	return 0;
 }
 
 
