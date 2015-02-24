@@ -111,7 +111,7 @@ void initialPieces(){
 		for( file = FILE_A; file <= FILE_H; file++){
 			square = FR2SQ( file, rank );
 			square64 = FR2SQ64(file, rank);
-			piece = board.sq64[square64];
+			piece = board.sq[square];
 			life++;
 			if( piece != 0 ){
 				pieces[piece].pos = square;
@@ -204,45 +204,12 @@ void initialBitboards(){			//Hopefully initializes bitboards
 	life++;
 	
 }
-/*
-int initialSDL()
-{
-	if(SDL_Init(SDL_INIT_VIDEO) != 0){
-		logSDLError(std::cout, "SDL_Init");
-		return 1;
-	}
 
-	SDL_Window *window = SDL_CreateWindow("Collider 0.01", 100, 100, 800, 600, SDL_WINDOW_SHOWN);
-	if(window == nullptr){
-		std::cout << "SDL_CreateWindow Error: " << SDL_GetError() << std::endl;
-		SDL_Quit();
-		return 1;
-	}
-
-	SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-	if(renderer == nullptr){
-		SDL_DestroyWindow(window);
-		std::cout << "SDL_CreateRenderer Error: " << SDL_GetError() << std::endl;
-		SDL_Quit();
-		return 1;
-	}
-	
-	SDL_RenderClear(renderer);
-	SDL_RenderPresent(renderer);
-
-	SDL_Delay(60000);
-
-	SDL_DestroyRenderer(renderer);
-	SDL_DestroyWindow(window);
-	SDL_Quit();
-	return 0;
-}
-*/
 void initializeAll(){
 	initialIndexes();
 	initialBoard();
 	initialPieces();
 	initialBitboards();
-//	initialSDL();
+	initSDL();
 	life++;
 }
