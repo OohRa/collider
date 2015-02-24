@@ -2,9 +2,18 @@
 #define SDL_H
 
 //sdl.h
+#include <SDL2/SDL.h>
 
+//Globals
+extern SDL_Renderer* gRenderer;
+extern SDL_Window* gWindow;
+extern SDL_Texture* pieceTextures[13];
+extern SDL_Texture* squareTextures[3];
 //Functions
-//void logSDLError( std::ostream &outputStream, const std::string &message );
-//std::string getResourcePath( const std::string &subDir = "" );
-//void renderTexture( SDL_Texture *texture, SDL_Renderer *renderer, int x, int y );
+bool initSDL();
+bool loadMedia();
+void closeSDL();
+SDL_Texture* loadTexture( SDL_Surface* );
+void createTextures();
+
 #endif
