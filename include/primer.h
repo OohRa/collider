@@ -14,7 +14,8 @@ extern int life;
 
 #define NAME "Collider 0.1"
 #define SQNUM 120
-
+#define SCREEN_HEIGHT 600
+#define SCREEN_WIDTH 600
 #define startFen "rnbqkbnr/pppppppp/8/8/8/8/pppppppp/RNBQKBNR w KQkq - 0 1"
 
 typedef unsigned long long U64;
@@ -25,6 +26,7 @@ typedef unsigned long long U64;
 enum { UP = 10, UPRT = 11, RT = 1, DWNRT = -9, DWN = -10, DWNLEFT = -11, LEFT = -1, UPLEFT = 9, BREAK = 99 };
 enum { ALIVE, DEAD };
 enum { NOTYPE, PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING };
+enum { gEMPTY, gWP, gWN, gWB, gWR, gWQ, gWK, gBP, gBN, gBB, gBR, gBQ, gBK };
 enum {  EMPTY,
 	wqR, wqN, wqB,  wQ,  wK, wkB, wkN, wkR,
 	wPa, wPb, wPc, wPd, wPe, wPf, wPg, wPh,
@@ -79,6 +81,11 @@ struct boardStruct
 
 	int oldPiece;
 	int oldVal;
+
+	int storePiece;
+	int storeSq;
+	
+	int enpasFlag;
 
 	int ply;
 	int oppPly;
