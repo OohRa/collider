@@ -1,6 +1,6 @@
 FILES = board.cpp initial.cpp display.cpp move.cpp input.cpp legal.cpp debug.cpp bitboards.cpp sdl.cpp collider.cpp 
 
-SDL = -framework SDL2
+SDL = -framework SDL2 -framework SDL2_image
 
 OBJECTS = $(FILES:.cpp=.o)
 
