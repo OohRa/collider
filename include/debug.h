@@ -4,6 +4,6 @@
 
 //Functions
 void bitboardDebug();
-void boardDebug( boardStruct &board, pieceStruct pieces[] );
-void debugAll( boardStruct &board, pieceStruct pieces[] );
+void boardDebug();
+void debugAll();
 #endif
