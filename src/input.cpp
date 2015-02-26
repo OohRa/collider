@@ -9,10 +9,13 @@
 #include "board.h"
 #include <unistd.h>
 
-//FUE
-bool userEntry(){		//Takes input and converts to file, rank.
+bool undoFlag = false;
 
+//FUE
+/* Takes input from the user and checks it for input error */
+bool userEntry(){	
 	std::string input;
+
 	//Display side to move
 	if( board.side == WHITE ){
 		std::cout << "White to move.\n";
@@ -20,59 +23,65 @@ bool userEntry(){		//Takes input and converts to file, rank.
 	else if( board.side == BLACK ){
 		std::cout << "Black to move.\n";
 	}
-	
-	else { std::cout << "Nothing!" << std::endl; };
+	else { std::cout << "Nothing!" << std::endl; }; //This should never occur
 
 	//Prompt and take the users input.
 	std::cout << "Enter your move!\n";
 	getline( std::cin, input );
-
-	if( input == "exit" ){
+	
+	//Allows quitting of program
+	if( input == "exit" || input == "quit" || input == "stop" ){
 		stop = true;
 		return false;
 	}
-	//Allows undo of one move (add multiple moves later when movelists are generated
+
+	//Allows undo of one move
+	// (add multiple moves later when movelists are generated
 	if( input == "undo" ){
+		if( undoFlag ){
+			std::cout << "Invalid move. Only undo once.\n";
+			return false;
+		}
 		std::cout << "Undoing move. Only undo one time!\n";
-		unmakeMove();
 		changeSide();
+		unmakeMove();
+		undoFlag = true;
 		return false;
 	}
 
 	//Set castling
 	if( input == "o-o" || input == "o-o-o" || input == "0-0" || input == "0-0-0" ){
 		board.castling = true;
-		board.frSq = ((board.side - 1) * 70) + 25;
+		board.newfrSq = ((board.side - 1) * 70) + 25;
 
 		//Set the toSq	
 		if( input == "o-o" || input == "0-0" ){
-			board.toSq = board.frSq + 1;
+			board.newtoSq = board.newfrSq + 1;
 		}
 		else{
-			board.toSq = board.frSq - 1;
+			board.newtoSq = board.newfrSq - 1;
 		}
 
-		board.oldtoSq = board.toSq;
-		board.oldfrSq = board.frSq;
 		life++;
 		return true;
 	}
 
-	//Error check for too many spaces. Will change later for castling and promotions etc.
+	//Error check for too many spaces.
+	// (Will change later for input leniency)
 	else{
 		board.castling = false;
-		if ((int)input.size()!=5){
+		if ((int)input.size()!=4){      	//Set input size from 5 to 4
 			std::cout << "Invalid input.\n";
 			return false;
 		}
 		
 		//Error check for invalid ranks and files
-		if ( (int)input[0] > 105 || (int)input[0] < 97 || (int)input[3] > 105 || (int)input[3] < 97 ){ 	
+		if ( (int)input[0] > 105 || (int)input[0] < 97 || (int)input[2] > 105 || (int)input[2] < 97 ){ 	
 			std::cout << "Invalid input.\n";
 			return false;
 		}
 
-		if(( (int)input[1] < 49) ||( (int)input[1] > 57) ||( (int)input[4] < 49) ||( (int)input[4] > 57) ){
+		if(( (int)input[1] < 49) ||( (int)input[1] > 57) ||( (int)input[3] < 49) ||( (int)input[3] > 57) ){
 			std::cout << "Invalid input.\n";
 			return false;
 		}
@@ -80,33 +89,17 @@ bool userEntry(){		//Takes input and converts to file, rank.
 	nl(9);
 
 	/* Converts the ASCI value of the input into file and rank */	
-	board.frSq = FR2SQ(((int)input[0] - 97), ((int)input[1] - 49));
-	board.toSq = FR2SQ(((int)input[3] - 97), ((int)input[4] - 49));	
-	board.oldfrSq = board.frSq;
-	board.oldtoSq = board.toSq;
-	return true;
-/*	 Debug output 
-	int index = 0;
-	for( index = 0; index < 5; index++)
-	{
-		if( index == 2 )
-			index++;
-		std::cout << input[index] << std::endl;
-	}
+	board.newfrSq = FR2SQ(((int)input[0] - 97), ((int)input[1] - 49));
+	board.newtoSq = FR2SQ(((int)input[2] - 97), ((int)input[3] - 49));	
 
-	nl(1);
-	
-	for( index = 0; index <5; index++)
-	{
-		if( index == 2 )
-			index++;
-		std::cout << (int)input[index] << std::endl;
-	}	
-*/
+	undoFlag = false;
+	return true;
 	life++;
 }
 
 /* Search code (FUI) */
+/* Container function which gets input and checks it for legality.
+   Basically takes input, checks it, and sets the official to and fr squares */
 void userInput(){
 	getInput();
 	if( stop ) return;
@@ -115,9 +108,13 @@ void userInput(){
 		getInput();
 		if( stop ) return;
 	}	
-	
+	board.oldfrSq = board.frSq;
+	board.oldtoSq = board.toSq;
+	board.frSq = board.newfrSq;
+	board.toSq = board.newtoSq;	
 }	
 
+/* Container function to check userEntry and repeatedly run until it returns true */
 void getInput(){
 	while( !userEntry() ){
 		if( stop ) return;
