@@ -1,5 +1,12 @@
 //collider.cpp
-
+/*************************************************************
+ * Collider Chess Engine
+ * Version: 0.5
+ * By: Dylan James Kolb-Bond
+ * Currently Done: Board Representation and SDL Graphics
+ * Need to be completed: Move generation, search and evaluate
+ * Known bugs: Cannot undo multiple times
+ *************************************************************/
 #include <iostream>
 #include "primer.h"
 #include "collider.h"
@@ -15,65 +22,18 @@
 int life;
 
 int main(){	
-
 	/* Main game loop */
 	initializeAll();
-	//Debug
-//	debugAll();
-
+	debugAll();
 	displayAll();
 	while( !stop ){
 		userInput();
-		if( stop ) return 0;
+		if( stop )
+			 return 0;
 		makeMove();
 		changeSide();
 		displayAll();	
 	}
-
-
-
-
-
-
-
-/* Old Game Loop */
-/*
-	initializeAll();
-	displayAll();
-	while( !stop ){
-		while( userEntry(); ){
-			userEntry();
-			if( stop ) return 0;
-			while( !checkLegal() ){
-				displayAll();
-				userEntry();
-				life++;
-				if( stop ) return 0;
-			}
-			while( checkCheck() ){
-				displayAll();
-				userEntry();
-				life++;
-				if( stop ) return 0;
-				while( !checkLegal() ){
-					displayAll();
-					userEntry();
-					life++;
-					if( stop ) return 0;
-				}
-			}
-		}
-		makeMove();
-		(board.side == WHITE) ? board.side = BLACK : board.side = WHITE;
-		displayAll();
-	}	
-*/
-	//Debugging
-/*
-	initializeAll();
-	debugAll();
-*/
-
 	closeSDL();
 	return 0;
 }
