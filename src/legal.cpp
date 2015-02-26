@@ -15,34 +15,31 @@
 /* Check if the user or cpu move is legal */
 /* BCL */
 bool checkLegal(){
-
 	int piece, toColor, toValue;
-	piece = board.sq[board.frSq];
-	toValue = board.sq[board.toSq];
-	toColor = getColor(board.toSq);	
+	piece = board.sq[board.newfrSq];
+	toValue = board.sq[board.newtoSq];
+	toColor = getColor(board.newtoSq);	
 
 	//Exits out of the game loop.
 	if( stop )
 		return false;
 
 	// Error check for invalid moves
+	/* Check for side */
 	if( board.side != pieces[piece].color){
 		std::cout << "Invalid move. ";
 		( board.side == WHITE ) ? std::cout << "White " : std::cout << "Black ";
 		std::cout << "to move.\n";
-
-		std::cout << "getColor returns: " << getColor( board.frSq );
-		std::cout << "\npiecelist return: " << pieces[piece].color << "\n";
-		std::cout << "board.side returns: " << board.side << "\n";
-		std::cout << "the current piece is: " << piece << "\n";
 		return false;
 	}
 
+	/* Don't move an empty piece */
 	if( piece == NONE ){
 		std::cout << "Invalid move. Empty square.\n";
 		return false;
 	}
 	
+	/* Can't take your own piece */
 	if( toColor == board.side ){
 		std::cout << "Invalid move. Don't take your own piece.\n";
 		return false;
@@ -59,17 +56,17 @@ bool checkLegal(){
 	/* 	Knight valid check (NVC) */ 
 	if( pieces[piece].type == KNIGHT ){
 		int knightLegal[8];
-		knightLegal[0] = (board.frSq - 21);
-		knightLegal[1] = (board.frSq - 19);
-		knightLegal[2] = (board.frSq - 12);
-		knightLegal[3] = (board.frSq -  8);
-		knightLegal[4] = (board.frSq +  8);
-		knightLegal[5] = (board.frSq + 12);
-		knightLegal[6] = (board.frSq + 19);
-		knightLegal[7] = (board.frSq + 21);
+		knightLegal[0] = (board.newfrSq - 21);
+		knightLegal[1] = (board.newfrSq - 19);
+		knightLegal[2] = (board.newfrSq - 12);
+		knightLegal[3] = (board.newfrSq -  8);
+		knightLegal[4] = (board.newfrSq +  8);
+		knightLegal[5] = (board.newfrSq + 12);
+		knightLegal[6] = (board.newfrSq + 19);
+		knightLegal[7] = (board.newfrSq + 21);
 
 		for( int index = 0; index < 8; index++ ){
-			if( knightLegal[index] == board.toSq )
+			if( knightLegal[index] == board.newtoSq )
 				return true;
 		}
 		
@@ -80,22 +77,22 @@ bool checkLegal(){
 	/* Rook Valid Check (RVC) */
 	if( pieces[piece].type == ROOK ){
 		int indexSq, checkPiece, diff, absDiff, slide;
-		diff = ( (board.toSq - board.frSq) % 10 );
-		absDiff = abs(board.toSq - board.frSq);
+		diff = ( (board.newtoSq - board.newfrSq) % 10 );
+		absDiff = abs(board.newtoSq - board.newfrSq);
 	
 		if( diff != 0 && (absDiff > 7) ){		//Eliminates impossible rook moves
 			std::cout << "Invalid move. Rooks don't move like that.\n";
 			return false;
 		}
 		if( diff == 0 )					//Defines which way rook is sliding
-			( board.toSq > board.frSq ) ? slide = 10 : slide = -10;
-		else ( board.toSq > board.frSq ) ? slide = 1 : slide = -1;	
+			( board.newtoSq > board.newfrSq ) ? slide = 10 : slide = -10;
+		else ( board.newtoSq > board.newfrSq ) ? slide = 1 : slide = -1;	
 
 		//Check the direction the rook is moving
-		for( indexSq = (board.frSq + slide); indexSq != board.toSq; indexSq += slide ){
+		for( indexSq = (board.newfrSq + slide); indexSq != board.newtoSq; indexSq += slide ){
 			checkPiece = board.sq[indexSq];
 			toColor = getColor(indexSq);
-			if( checkPiece == board.toSq ) return true;
+			if( checkPiece == board.newtoSq ) return true;
 			if( toColor != 0 ){
 				std::cout << "Invalid move. Rooks can't move through pieces.\n";
 				return false;
@@ -108,11 +105,10 @@ bool checkLegal(){
 	}
 
 	/* Bishop Valid Check (BVC) */
-	if( pieces[piece].type == BISHOP )
-	{
+	if( pieces[piece].type == BISHOP ){
 		int indexSq, checkPiece, diff, absDiff, slide;
-		diff = (board.toSq - board.frSq);
-		absDiff = abs(board.toSq - board.frSq);
+		diff = (board.newtoSq - board.newfrSq);
+		absDiff = abs(board.newtoSq - board.newfrSq);
 		
 		/* Negate any move that isn't a diagonal */
 		if(!((absDiff % 11 == 0) || (absDiff % 9 == 0))){
@@ -128,10 +124,10 @@ bool checkLegal(){
 		else return false;
 
 		/* Check the direction the Bishop is moving */
-		for( indexSq = (board.frSq + slide); indexSq != board.toSq; indexSq += slide ){
+		for( indexSq = (board.newfrSq + slide); indexSq != board.newtoSq; indexSq += slide ){
 			checkPiece = board.sq[indexSq];
 			toColor = getColor(indexSq);
-			if( checkPiece == board.toSq ) return true;
+			if( checkPiece == board.newtoSq ) return true;
 			if( toColor != 0 ){
 				std::cout << "Invalid move. Bishops can't move through pieces.\n";
 				return false;
@@ -144,11 +140,10 @@ bool checkLegal(){
 	}
 
 	/* Queen Valid Check (QVC) */	
-	if( pieces[piece].type == QUEEN )
-	{
+	if( pieces[piece].type == QUEEN ){
 		int indexSq, checkPiece, diff, absDiff, slide;
-		diff = (board.toSq - board.frSq);
-		absDiff = (abs(board.toSq - board.frSq));
+		diff = (board.newtoSq - board.newfrSq);
+		absDiff = (abs(board.newtoSq - board.newfrSq));
 	
 		/* Negate any move that isn't an option */
 		if(!((absDiff % 11 == 0) || (absDiff % 9 == 0) || (absDiff % 10 == 0) || (absDiff < 7))){
@@ -167,10 +162,10 @@ bool checkLegal(){
 			(diff > 0) ? slide = 1: slide = -1;
 
 		/* Check the direction of movement */
-		for( indexSq = (board.frSq + slide); indexSq != board.toSq; indexSq += slide ){
+		for( indexSq = (board.newfrSq + slide); indexSq != board.newtoSq; indexSq += slide ){
 			checkPiece = board.sq[indexSq];
 			toColor = getColor(indexSq);
-			if( indexSq == board.toSq ) return true;
+			if( indexSq == board.newtoSq ) return true;
 			if( toColor != 0 ){
 				std::cout << "Invalid move. Queen can't move through pieces.\n";
 				return false;
@@ -186,7 +181,7 @@ bool checkLegal(){
 	/* King Valid Check (KVC) */
 	if( pieces[piece].type == KING ){
 		int indexSq, checkPiece, diff, absDiff, slide;
-		diff = (board.toSq - board.frSq);
+		diff = (board.newtoSq - board.newfrSq);
 		absDiff = abs(diff);
 		
 		/* Negate any moves outside range */
@@ -206,10 +201,10 @@ bool checkLegal(){
 			(diff > 0) ? slide = 1: slide = -1;
 
 		/* Check the direction of movement */
-		for( indexSq = (board.frSq + slide); indexSq != board.toSq; indexSq += slide ){
+		for( indexSq = (board.newfrSq + slide); indexSq != board.newtoSq; indexSq += slide ){
 			checkPiece = board.sq[indexSq];
 			toColor = getColor(indexSq);
-			if( indexSq == board.toSq ) return true;
+			if( indexSq == board.newtoSq ) return true;
 			if( toColor != 0 ){
 				std::cout << "Invalid move. King can't move through pieces.\n";
 				return false;
@@ -224,10 +219,10 @@ bool checkLegal(){
 	/* Pawn Valid Check (PVC) */		
 	if( pieces[piece].type == PAWN ){
 		int checkPiece, diff, absDiff, piece, toValue, toColor, slide;
-		piece = board.sq[board.frSq];
-		toValue = board.sq[board.toSq];
-		toColor = getColor(board.toSq);
-		diff = board.toSq - board.frSq;;
+		piece = board.sq[board.newfrSq];
+		toValue = board.sq[board.newtoSq];
+		toColor = getColor(board.newtoSq);
+		diff = board.newtoSq - board.newfrSq;;
 		absDiff = abs(diff);
 
 		/* Negate non-legal pawn moves */
@@ -251,7 +246,7 @@ bool checkLegal(){
 		}
 		
 		/* Negates OFFBOARD squares */
-		if( board.toSq == -1 ){
+		if( board.newtoSq == -1 ){
 			std::cout << "Invalid move. Can't move offboard.\n";
 			return false;
 		}
@@ -271,7 +266,7 @@ bool checkLegal(){
 			std::cout << board.enPas << "\n";
 			if( toColor != board.side && toColor != EMPTY ) return true;
 			else if( toColor == EMPTY ){
-				if( board.enPas == board.toSq ) return true;
+				if( board.enPas == board.newtoSq ) return true;
 				else{
 					std::cout << "Invalid move. Pawns must capture diagonally.\n";
 					return false;
@@ -285,39 +280,35 @@ bool checkLegal(){
 				std::cout << "Invalid move. Pawns can't capture forwards.\n";
 				return false;
 			} 
-			if( board.side == WHITE && board.frSq > H2 ){
+			if( board.side == WHITE && board.newfrSq > H2 ){
 				std::cout << "Invalid move. Pawns can only move two squares on their first move.\n";
 				return false;
 			}
-			else if( board.side == BLACK && board.frSq < A7 ){
+			else if( board.side == BLACK && board.newfrSq < A7 ){
 				std::cout << "Invalid move. Pawns can only move two squares on their first move.\n";
 				return false;
 			} 
 			( board.side == WHITE ) ? slide = 10: slide = -10;
-			for( checkPiece = (board.frSq + slide); checkPiece != board.toSq; checkPiece += slide ){
+			for( checkPiece = (board.newfrSq + slide); checkPiece != board.newtoSq; checkPiece += slide ){
 				toValue = board.sq[checkPiece];
 				if( toValue != EMPTY ){
 					std::cout << "Invalid move. Piece be in the way.\n";
 					return false;
 				}
-				if( checkPiece == board.toSq ) return true;
+				if( checkPiece == board.newtoSq ) return true;
 			}
 		}
 	}
 
-
-		
 	return true;
-
 }
+
 /*  checkCheck function
  *  checks if the users move put his own king in check
  *  not if he put the opponents king in check.
  *  Search code (FCC)					 */
 bool checkCheck(){
-	
 	int kingSq, slide, index, toColor, toType, checkPiece;
-
 	int knightLegal[8] = { 21, 12, -8, -19, -21, -12, 8, 19 };	
 	int moveDir[9] = { UP, UPRT, RT, DWNRT, DWN, DWNLEFT, LEFT, UPLEFT, BREAK };
 
@@ -375,14 +366,14 @@ bool checkCheck(){
 				if( toType == ROOK || toType == QUEEN ){
 					if( abs(slide) % 10 == 0 || slide == RT || slide == LEFT ){
 						std::cout << "Invalid move. You are in check by rook or queen\n";
-						std::cout << "Test checkCheck.\nkingSq is: " << kingSq << "\ncheckPiece is: " << checkPiece << "\n";
 						return true;
 					}
 				}
 			}
 		}
 	}
-					
+	
+	//After check for sliding checks, check for knight checks, check.				
 	for( int index = 0; index < 8; index++ ){
 		int checkSq = (kingSq + knightLegal[index]);
 		int toColor, toType;
@@ -401,15 +392,14 @@ bool checkCheck(){
 
 /* BCC */	
 bool checkCastle(){
-
 	int shift, piece, rookSq, diff;
 	int* mF;
 	int* mT;
-	mF = &(board.frSq);
-	mT = &(board.toSq);
+	mF = &(board.newfrSq);
+	mT = &(board.newtoSq);
 	diff = *mT - *mF;
-
 	piece = getPiece(*mF);
+
 	//Define kingside or queenside rook squares
 	if( diff > 0 ){
 		rookSq = *mF + 3;
@@ -448,39 +438,55 @@ bool checkCastle(){
 
 	//Check initial castling position
 	if( checkCheck() ) return false;
-	std::cout << board.castling;	
-	std::cout << "The movefrom square is: " << *mF << "\nThe moveto square is: " << *mT << "\n";
+
 	//Set board.castling to false to allow checking of check for normal king movement.
 	board.castling = false;
+	board.frSq = *mF;
+	board.toSq = *mT;
 	makeMove();
 	if( checkCheck() ){
 		unmakeMove();
+		board.frSq = board.oldfrSq;
+		board.toSq = board.oldtoSq;
 		return false;
 	}
 	unmakeMove();
+	board.frSq = board.oldfrSq;
+	board.toSq = board.oldtoSq;
 
 	*mT += shift;
+	board.frSq = *mF;
+	board.toSq = *mT;
 	makeMove();
 	if( checkCheck() ){
 		unmakeMove();
+		board.frSq = board.oldfrSq;
+		board.toSq = board.oldtoSq;
 		return false;
 	}
 	unmakeMove();
+	board.frSq = board.oldfrSq;
+	board.toSq = board.oldtoSq;
+	
 	//Reset castling to true to allow final moving of pieces (better way to do this?)
 	board.castling = true;
-	
 	
 	return true;				
 }	
 
+/* Checks for check by moving piece, check that position for check, then unmaking */
 bool moveCheck(){
 	bool retVal;
 
 	if( !board.castling ){
+		board.frSq = board.newfrSq;
+		board.toSq = board.newtoSq;
 		makeMove();
 		if( checkCheck() ) retVal = true;
 		else retVal = false;
 		unmakeMove();
+		board.frSq = board.oldfrSq;
+		board.toSq = board.oldtoSq;
 	}
 	else retVal = false;
 
