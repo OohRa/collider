@@ -167,7 +167,7 @@ void moveGen(){
 	//Fill board movelist with pieces movelists
 	piece = (board.side == WHITE) ? wqR: bqR;
 	for( int i = 0; i < 16; i++ ){
-		for( int j = 0; j < pce[piece].mL.size(); i++ ){
+		for( int j = 0; j < pce[piece].mL.size(); j++ ){
 			board.mL.push_back(pce[piece].mL[j]);
 		}
 		piece++;
