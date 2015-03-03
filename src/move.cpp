@@ -16,6 +16,7 @@ void makeMove(){
 	/* Makes the users move */
 	if( board.castling ){
 		int king, rook, diff, rookFrom, rookTo, kingTo; 
+		toVal = 0;
 		diff = (board.toSq - board.frSq);
 		king = board.sq[board.frSq];
 
@@ -103,13 +104,14 @@ void makeMove(){
 		int diff = board.toSq - board.frSq;	
 		if(diff > 0) board.enPas = board.toSq - 10;
 		else board.enPas = board.toSq + 10;
-		//Debug
 	}
+
+	undo.push_back({(board.frSq * 100 + board.toSq), board.enPas, piece, toVal});
 }
 
 //(VUM)
 void unmakeMove(){
-
+	
 	if( !board.castling ){
 
 	/* Unmakes the users move */
