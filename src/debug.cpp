@@ -1,5 +1,5 @@
 //debug.cpp
-// Use for writing functions to test 
+//Use for writing functions to test 
 
 #include <iostream>
 #include "primer.h"
@@ -8,44 +8,6 @@
 #include "board.h"
 
 void boardDebug(){
-
-	int rank, file, square64, square120;
-
-	//Printing both boards for debugging
-	
-	printf("Board64 by file and rank.\n\n");
-	for( rank = RANK_8; rank >= RANK_1; rank--){
-		for( file = FILE_A; file <= FILE_H; file++){
-			square64 = FR2SQ64(file, rank);
-			if( board.sq64[square64] < 10 ){
-			}	
-			printf("%d ", board.sq64[square64]);
-		}
-		nl(1);
-	}
-	nl(1);
-	nl(1);
-
-		//Change board.sq to output all squares in right order	
-	printf("Board120 by file and rank.\n\n");
-	for( rank = RANK_8; rank >= RANK_1; rank--){
-		for( file = FILE_A; file <= FILE_H; file++){
-			square120 = FR2SQ( file , rank);
-			if( board.sq[square120] < 10 ){
-			}
-			printf("%d ", board.sq[square120]);
-		}
-		nl(1);
-	}
-	nl(1);	
-	nl(1);
-
-	
-	for( int index = 1; index <= 32; index++){
-		printf("%d ", pieces[index].pos);
-		nl(1);
-	}		
-	
 }
 
 
@@ -178,27 +140,73 @@ void bitboardDebug(){
 /* Search Code (FCD) */
 void checkDebug(){
 	int square;
+	std::cout << "Debug All.\n";
+	nl(1);
+	std::cout << "Values.\n";
 	for( int rank = RANK_8; rank >= RANK_1; rank-- ){
 		for( int file = FILE_A; file <= FILE_H; file++){
-			square = FR2SQ(file, rank);
-			std::cout << getColor( board.sq[square] );		
+			square = FR2SQ(file,rank);
+			if( getPiece(square) < 10 ) 
+				std::cout << " ";
+			std::cout << getPiece(square) << " ";
 		}
 		nl(1);
 	}
-
-	nl(5);
-
-	for( int index = 0; index < 32; index++ ){
-		std::cout << pieces[index].color;
+	std::cout << "Colors.\n";
+	for( int rank = RANK_8; rank >= RANK_1; rank-- ){
+		for( int file = FILE_A; file <= FILE_H; file++){
+			square = FR2SQ(file, rank);
+			std::cout << getColor( square ) << " ";
+		}
 		nl(1);
 	}
+	std::cout << "Types.\n";
+	for( int rank = RANK_8; rank >= RANK_1; rank-- ){
+		for( int file = FILE_A; file <= FILE_H; file++){
+			square = FR2SQ(file,rank);
+			std::cout << getType( square ) << " ";
+		}
+		nl(1);
+	}
+	std::cout << "Moved.\n";
+	for( int rank = RANK_8; rank >= RANK_1; rank-- ){
+		for( int file = FILE_A; file <= FILE_H; file++){
+			square = FR2SQ(file,rank);
+			std::cout << pce[getPiece(square)].moved << " ";
+		}
+		nl(1);
+	}
+	std::cout << "Alive.\n";
+	for( int rank = RANK_8; rank >= RANK_1; rank-- ){
+		for( int file = FILE_A; file <= FILE_H; file++){
+			square = FR2SQ(file,rank);
+			std::cout << pce[getPiece(square)].life << " ";
+		}
+		nl(1);
+	}
+	
+	std::cout << "Movelist.\n";
+	for( int i = 0; i < board.mL.size(); i++ ){
+		std::cout << board.mL[i] << " ";
+		if( i % 8 == 0 )
+			std::cout << "\n";
+	}
+	nl(1);
+
+	std::cout << "Undolist.\n";
+	for( int i = 0; i < undo.size(); i++){
+		std::cout << undo[i].move << " ";
+		if( i % 8 == 0 )
+			nl(1);
+	}
+	nl(1);
 }
 
 /* debugAll function
  * Used for general debugging 
  * Search Code (FDA)		*/
 void debugAll(){
-//	boardDebug( board, pieces );
+	//boardDebug();
 	//bitboardDebug();
 	checkDebug();
 }
