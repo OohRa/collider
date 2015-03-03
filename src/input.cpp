@@ -9,8 +9,6 @@
 #include "board.h"
 #include <unistd.h>
 
-bool undoFlag = false;
-
 //FUE
 /* Takes input from the user and checks it for input error */
 bool userEntry(){	
@@ -35,20 +33,6 @@ bool userEntry(){
 		return false;
 	}
 
-	//Allows undo of one move
-	// (add multiple moves later when movelists are generated
-	if( input == "undo" ){
-		if( undoFlag ){
-			std::cout << "Invalid move. Only undo once.\n";
-			return false;
-		}
-		std::cout << "Undoing move. Only undo one time!\n";
-		changeSide();
-		unmakeMove();
-		undoFlag = true;
-		return false;
-	}
-
 	//Set castling
 	if( input == "o-o" || input == "o-o-o" || input == "0-0" || input == "0-0-0" ){
 		board.castling = true;
@@ -70,18 +54,18 @@ bool userEntry(){
 	// (Will change later for input leniency)
 	else{
 		board.castling = false;
-		if ((int)input.size()!=4){      	//Set input size from 5 to 4
+		if ((int)input.size()!=5){      	
 			std::cout << "Invalid input.\n";
 			return false;
 		}
 		
 		//Error check for invalid ranks and files
-		if ( (int)input[0] > 105 || (int)input[0] < 97 || (int)input[2] > 105 || (int)input[2] < 97 ){ 	
+		if ( (int)input[0] > 105 || (int)input[0] < 97 || (int)input[3] > 105 || (int)input[3] < 97 ){ 	
 			std::cout << "Invalid input.\n";
 			return false;
 		}
 
-		if(( (int)input[1] < 49) ||( (int)input[1] > 57) ||( (int)input[3] < 49) ||( (int)input[3] > 57) ){
+		if(( (int)input[1] < 49) ||( (int)input[1] > 57) ||( (int)input[4] < 49) ||( (int)input[4] > 57) ){
 			std::cout << "Invalid input.\n";
 			return false;
 		}
@@ -90,9 +74,8 @@ bool userEntry(){
 
 	/* Converts the ASCI value of the input into file and rank */	
 	board.newfrSq = FR2SQ(((int)input[0] - 97), ((int)input[1] - 49));
-	board.newtoSq = FR2SQ(((int)input[2] - 97), ((int)input[3] - 49));	
+	board.newtoSq = FR2SQ(((int)input[3] - 97), ((int)input[4] - 49));	
 
-	undoFlag = false;
 	return true;
 	life++;
 }
