@@ -6,6 +6,7 @@
 #include "board.h"
 #include <cmath>
 #include "legal.h"
+#include "debug.h"
 
 //(VMM)
 void makeMove(){
@@ -14,8 +15,9 @@ void makeMove(){
 	board.oldtoSq = board.toSq;	
 	
 	/* Makes the users move */
-	if( board.castling ){
-		int king, rook, diff, rookFrom, rookTo, kingTo; 
+	if( board.castling || (getType(board.frSq) == KING && abs(board.toSq - board.frSq) == 2)){
+		std::cout << "Test inside makemove castling.\n";
+		int king, rook, diff, rookFrom = 0, rookTo = 0, kingTo = 0; 
 		toVal = 0;
 		diff = (board.toSq - board.frSq);
 		king = board.sq[board.frSq];
@@ -28,11 +30,13 @@ void makeMove(){
 		}
 
 		//likewise for queenside
-		else{
+		else if( diff < 0){
 			rookFrom = board.frSq - 4;
 			rookTo = board.frSq - 1;
 			kingTo = board.toSq;
 		}
+		else
+			std::cout << "What is happening?\n";
 		rook = board.sq[rookFrom];
 		board.oldtoSq = rookTo;
 		board.storePiece = rook;
@@ -44,9 +48,11 @@ void makeMove(){
 		piece = board.sq[board.frSq];
 		pce[piece].pos = kingTo;
 		pce[rook].pos = rookTo;
-		pce[piece].moved++;
-		pce[rook].moved++;
-
+		if( piece != EMPTY){
+			pce[piece].moved++;
+		}
+		if( rook != EMPTY )
+			pce[rook].moved++;
 		board.sq[board.frSq] = EMPTY;
 		board.sq[kingTo] = king;
 		board.sq[rookFrom] = EMPTY;
@@ -94,7 +100,8 @@ void makeMove(){
 
 		/* Update piecelist */
 		pce[piece].pos = board.toSq;
-		pce[piece].moved++;
+		if( piece != EMPTY )
+			pce[piece].moved++;
 		life++;
 	}
 
@@ -106,18 +113,52 @@ void makeMove(){
 		else board.enPas = board.toSq + 10;
 	}
 
-	undo.push_back({(board.frSq * 100 + board.toSq), board.enPas, piece, toVal});
+	undo.push_back({(board.frSq * 100 + board.toSq), board.enPas, (piece * 100) + toVal});
 }
 
 //(VUM)
 void unmakeMove(){
 
-	undo.pop_back();
 	board.frSq = undo[undo.size() - 1].move/100;
 	board.toSq = undo[undo.size() - 1].move%100;
-	if( !board.castling ){
+	board.oldPiece = undo[undo.size() - 1].piece/100;
+	board.oldVal = undo[undo.size() - 1].piece%100;
+	board.enPas = undo[undo.size() - 1].enPas;
 
-	/* Unmakes the users move */
+	if( board.castling || (getType(board.toSq) == KING && abs(board.toSq - board.frSq) == 2 )){
+		std::cout << "Test in unmake castling!\n";
+		int kingSq, diff, king;
+		king = (board.side == WHITE) ? wK: bK;
+		(board.side == WHITE) ? kingSq = pce[wK].pos: kingSq = pce[bK].pos;
+		std::cout << "King is: " << king << "\n";
+		std::cout << "KingSq: " << kingSq << "\n";
+		std::cout << "Side is: " << board.side << "\n";
+		board.sq[board.toSq] = EMPTY;
+		board.sq[board.frSq] = board.oldPiece;
+		diff = board.toSq - board.frSq;
+		
+		if( diff > 0 ){
+			board.sq[board.frSq + 1] = EMPTY;
+			board.storeSq = kingSq + 1;
+			board.storePiece = king + 3;
+		}
+		else{
+			board.sq[board.frSq - 1] = EMPTY;
+			board.storeSq = kingSq - 2;
+			board.storePiece = king - 4;
+		}
+		board.sq[board.storeSq] = board.storePiece; 
+		pce[board.storePiece].pos = board.toSq;
+		pce[board.oldPiece].pos = board.frSq;
+		if( board.oldPiece != EMPTY ){
+			pce[board.oldPiece].moved--;
+			pce[board.storePiece].moved--;
+		}
+		debugAll();
+	}
+	else if( !board.castling ){
+
+	/* Unmakes the users move ( converting to vector undo ) */
 	board.sq[board.toSq] = board.oldVal;
 	board.sq[board.frSq] = board.oldPiece;
 
@@ -125,32 +166,24 @@ void unmakeMove(){
 	if( board.oldVal != EMPTY )
 		pce[board.oldVal].life = true;
 	pce[board.oldPiece].pos = board.frSq;
-	pce[board.oldPiece].moved--;
-	if( getType(board.frSq) == PAWN && getType(board.toSq) == EMPTY && abs(board.toSq - board.frSq) == 11){
+	if( board.oldPiece != EMPTY )
+		pce[board.oldPiece].moved--;
+	if( getType(board.frSq) == PAWN && getType(board.toSq) == EMPTY && (abs(board.toSq - board.frSq) == 11 || abs(board.toSq - board.frSq) == 9)){
+		if( abs(board.toSq - board.frSq) == 11 ){
+			board.storeSq = board.frSq + 1;	
+		}
+		else if( abs(board.toSq - board.frSq) == 9 ){
+			board.storeSq = board.frSq - 1;
+		}
+
+		board.storePiece = (board.side == WHITE) ? 8 + (board.storeSq % 8): 24 + (board.storeSq % 8);
 		board.sq[board.storeSq] = board.storePiece;
 		pce[board.storePiece].pos = board.storeSq;
 		pce[board.storePiece].life = true;
 	}
 	}
-	else if( board.castling ){
-		int kingSq, diff;
-		(board.side == WHITE) ? kingSq = pce[wK].pos: kingSq = pce[bK].pos;
-		board.sq[board.toSq] = EMPTY;
-		board.sq[board.frSq] = board.oldPiece;
-		board.sq[board.storeSq] = board.storePiece;
-		diff = board.toSq - board.frSq;
-		if( diff > 0 ) board.sq[board.frSq + 1] = EMPTY;
-		else board.sq[board.frSq - 1] = EMPTY;
-
-		pce[board.storePiece].pos = board.toSq;
-		pce[board.oldPiece].pos = board.frSq;
-		pce[board.oldPiece].moved--;
-		pce[board.storePiece].moved--;
-	/*	if( getType(kingSq + 1) == ROOK && getColor(kingSq + 1) == board.side){
-			board	
-		{	*/	
-	}
-
+	undo.pop_back();
+	board.castling = false;
 }
 
 void changeSide(){	
@@ -221,15 +254,6 @@ void genPawn(){
 
 	pawn -= 8;
 
-	//Output Pawn movelist
-	for( int i = 0; i < 8; i++ ){
-		std::cout << "Pawn " << i + 1 << " movelist is: ";
-		for( int j = 0; j < pce[pawn].mL.size(); j++ ){
-			std::cout << pce[pawn].mL[j] << " ";
-		}
-		std::cout << "\n";
-		pawn++;
-	}
 }
 
 void genRook(){
@@ -267,16 +291,6 @@ void genRook(){
 			rook += change;
 	}
 	
-	//Test output of movelists
-	rook -= change;
-	for( int i = 0; i < 2; i++){
-		std::cout << "The Rooks movelists are: "; 
-		for( int j = 0; j < pce[rook].mL.size(); j++ ){
-			std::cout << pce[rook].mL[j] << " ";
-		}
-		std::cout << "\n";
-		rook += change;
-	}
 }
 
 void genKnight(){
@@ -301,14 +315,6 @@ void genKnight(){
 	}
 
 	knight -= change;
-	for( int j = 0; j < 2; j++ ){
-		std::cout << "Knight Movelist is: ";
-		for( int i = 0; i < pce[knight].mL.size(); i++ ){
-			std::cout << pce[knight].mL[i] << " ";
-		}
-		knight +=change;
-		std::cout << "\n";
-	}
 
 	return;
 }
@@ -348,16 +354,6 @@ void genBishop(){
 			bishop += change;
 	}
 	
-	//Test output of movelists
-	bishop -= change;
-	for( int i = 0; i < 2; i++){
-		std::cout << "The Bishop movelists are: "; 
-		for( int j = 0; j < pce[bishop].mL.size(); j++ ){
-			std::cout << pce[bishop].mL[j] << " ";
-		}
-		std::cout << "\n";
-		bishop += change;
-	}
 }
 
 void genQueen(){
@@ -392,12 +388,6 @@ void genQueen(){
 	}		
 	
 	
-	//Test output of movelists
-	std::cout << "The Queen movelist are: "; 
-	for( int j = 0; j < pce[queen].mL.size(); j++ ){
-		std::cout << pce[queen].mL[j] << " ";
-	}
-	std::cout << "\n";
 	
 }
 
@@ -435,12 +425,6 @@ void genKing(){
 	}		
 	
 	
-	//Test output of movelists
-	std::cout << "The King movelist are: "; 
-	for( int j = 0; j < pce[king].mL.size(); j++ ){
-		std::cout << pce[king].mL[j] << " ";
-	}
-	std::cout << "\n";
 }
 
 void genCastle(){
@@ -460,12 +444,6 @@ void genCastle(){
 	if( checkCastle() )
 		pce[king].mL.push_back((kingSq * 100 ) + (kingSq + 2));
 
-	//Display Movelists
-	std::cout << "Castling moves are: ";
-	for( int i = 0; i < pce[king].mL.size(); i++ ){
-		std::cout << pce[king].mL[i] << " ";	
-	}
-	std::cout << "\n";
 	
 	//Reset fr and to squares
 	board.newfrSq = frSq;
