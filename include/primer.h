@@ -4,12 +4,16 @@
 
 #ifndef PRIMER_H
 #define PRIMER_H
-
-
+#include <iostream>
+#include <vector>
 
 
 //CONSTANTS
 extern int life;
+
+//Globals
+extern bool undoFlag;
+
 //DEFINITIONS
 
 #define NAME "Collider 0.1"
@@ -24,7 +28,7 @@ typedef unsigned long long U64;
 //ENUMERATION
 
 enum { UP = 10, UPRT = 11, RT = 1, DWNRT = -9, DWN = -10, DWNLEFT = -11, LEFT = -1, UPLEFT = 9, BREAK = 99 };
-enum { ALIVE, DEAD };
+enum { ALIVE, DEAD = -1 };
 enum { NOTYPE, PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING };
 enum { gEMPTY, gWP, gWN, gWB, gWR, gWQ, gWK, gBP, gBN, gBB, gBR, gBQ, gBK };
 enum {  EMPTY,
@@ -72,7 +76,12 @@ enum { FALSE, TRUE };
 
 struct boardStruct
 {
+	
 	int side;
+	
+	int newfrSq;
+	int newtoSq;
+
 	int frSq;
 	int toSq;
 
@@ -97,6 +106,7 @@ struct boardStruct
 
 	bool castling;
 	int enPas;
+	std::vector<int> mL;
 };	
 
 struct pieceStruct
@@ -106,10 +116,10 @@ struct pieceStruct
 	int color;
 	int type;
 	int value;
-	bool alive;
+	bool life;
 	U64 bitboard;
-	int movelistSize;
 	int moved;
+	std::vector<int> mL;
 };
 
 struct bitboardStruct 
@@ -144,13 +154,21 @@ struct indexStruct
 	int sq64[64];
 };
 
+struct undoStruct
+{
+	int move;
+	int enPas;
+	int storePiece;
+	int storeVal;
+}
+
 //Globals
 extern boardStruct board;
-extern pieceStruct pieces[33];
+extern pieceStruct pce[33];
 extern indexStruct indexArray;
 extern bitboardStruct bb;
 extern bool stop;
-
+extern undoStruct std::vector<int> undo;
 //MACROS
 
 /*
