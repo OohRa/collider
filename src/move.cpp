@@ -111,7 +111,10 @@ void makeMove(){
 
 //(VUM)
 void unmakeMove(){
-	
+
+	undo.pop_back();
+	board.frSq = undo[undo.size() - 1].move/100;
+	board.toSq = undo[undo.size() - 1].move%100;
 	if( !board.castling ){
 
 	/* Unmakes the users move */
@@ -168,6 +171,7 @@ void moveGen(){
 
 	//Fill board movelist with pieces movelists
 	piece = (board.side == WHITE) ? wqR: bqR;
+	board.mL.clear();
 	for( int i = 0; i < 16; i++ ){
 		for( int j = 0; j < pce[piece].mL.size(); j++ ){
 			board.mL.push_back(pce[piece].mL[j]);
