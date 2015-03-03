@@ -5,6 +5,7 @@
 #include "move.h"
 #include "board.h"
 #include <cmath>
+#include "legal.h"
 
 //(VMM)
 void makeMove(){
@@ -153,12 +154,24 @@ void changeSide(){
 }
 
 void moveGen(){
+	int piece;
+
 	genKnight();
 	genBishop();
 	genQueen();
 	genPawn();
 	genRook();
 	genKing();
+	genCastle();
+
+	//Fill board movelist with pieces movelists
+	piece = (board.side == WHITE) ? wqR: bqR;
+	for( int i = 0; i < 16; i++ ){
+		for( int j = 0; j < pce[piece].mL.size(); i++ ){
+			board.mL.push_back(pce[piece].mL[j]);
+		}
+		piece++;
+	}	
 }
 
 void genPawn(){	
@@ -422,4 +435,33 @@ void genKing(){
 		std::cout << pce[king].mL[j] << " ";
 	}
 	std::cout << "\n";
+}
+
+void genCastle(){
+	int frSq, toSq, kingSq, king;
+	frSq = board.newfrSq;
+	toSq = board.newtoSq;
+	king = (board.side == WHITE) ? wK: bK;
+	kingSq = (board.side == WHITE) ? pce[wK].pos: pce[bK].pos;
+	board.newfrSq = kingSq;
+	
+	//Check kingside
+	board.newtoSq = kingSq + 1;
+	if( checkCastle() )
+		pce[king].mL.push_back((kingSq * 100 ) + (kingSq + 2));
+	//Check queenside
+	board.newtoSq = kingSq -1;
+	if( checkCastle() )
+		pce[king].mL.push_back((kingSq * 100 ) + (kingSq + 2));
+
+	//Display Movelists
+	std::cout << "Castling moves are: ";
+	for( int i = 0; i < pce[king].mL.size(); i++ ){
+		std::cout << pce[king].mL[i] << " ";	
+	}
+	std::cout << "\n";
+	
+	//Reset fr and to squares
+	board.newfrSq = frSq;
+	board.newtoSq = toSq;
 }
