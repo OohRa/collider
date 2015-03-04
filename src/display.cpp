@@ -6,6 +6,7 @@
 #include "display.h"
 #include "board.h"
 #include "sdl.h"
+#include "debug.h"
 
 void nl(int lines){
 	for(int lineCount = 0; lineCount < lines; lineCount++){
@@ -136,7 +137,7 @@ void displayBitboard(){
 
 //FDG
 int displayGraphics(){
-	int file, rank, piece, square, type, xPos, yPos, colorSq, colorCount;
+	int piece, square, colorSq, colorCount;
 	SDL_SetRenderDrawColor( gRenderer, 255, 255, 255, 255 );
 	SDL_RenderClear(gRenderer);
 	SDL_Rect rSquare;
@@ -185,7 +186,11 @@ int displayGraphics(){
 			case 32: showPiece = gBP; break;
 			default: printf("?");
 		}
-		rSquare = { (file * 75), ((7-rank) * 75), 75, 75 };
+		if( !flipFlag ){
+			rSquare = { (file * 75), ((7-rank) * 75), 75, 75 };
+		}
+		else
+			rSquare = { ((7 - file) * 75), ((rank) * 75), 75, 75 };
 		SDL_RenderCopy( gRenderer, squareTextures[colorSq], NULL, &rSquare );
 		if( showPiece != EMPTY )
 		SDL_RenderCopy( gRenderer, pieceTextures[showPiece], NULL, &rSquare );	
