@@ -8,6 +8,7 @@
 #include "legal.h"
 #include "board.h"
 #include <unistd.h>
+#include "debug.h"
 
 //FUE
 /* Takes input from the user and checks it for input error */
@@ -33,11 +34,38 @@ bool userEntry(){
 		return false;
 	}
 
+	//Undo input command	
+	if( input == "undo" || input == "u" ){
+		if( undo.size() < 1 ){
+			std::cout << "Can't undo anymore!\n";
+			return false;
+		}
+		changeSide();
+		unmakeMove();
+		debugAll();
+		return false;
+	}
+
+	//Flip board command
+	if( input == "flip" ){
+		flipFlag = (flipFlag) ? false: true;
+	}
+
+	//Restart command
+	if( input == "restart" || input == "r" ){
+		for( int i = undo.size(); i > 0; i--){
+			std::cout << "Undo size is: " << undo.size() << "\n";
+			changeSide();
+			unmakeMove();
+		}
+		return false;
+	}
+
 	//Set castling
 	if( input == "o-o" || input == "o-o-o" || input == "0-0" || input == "0-0-0" ){
 		board.castling = true;
 		board.newfrSq = ((board.side - 1) * 70) + 25;
-
+		std::cout << "The kingSq is: " << board.newfrSq << "\n";
 		//Set the toSq	
 		if( input == "o-o" || input == "0-0" ){
 			board.newtoSq = board.newfrSq + 1;
@@ -45,6 +73,7 @@ bool userEntry(){
 		else{
 			board.newtoSq = board.newfrSq - 1;
 		}
+		std::cout << "The toSq is: " << board.newtoSq << "\n";
 
 		life++;
 		return true;
