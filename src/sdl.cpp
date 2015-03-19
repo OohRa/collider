@@ -174,6 +174,7 @@ SDL_Texture* loadTexture( SDL_Surface* surface ){
 
 	return gTexture;
 }
+
 //Create all the textures from surfaces
 void createTextures(){
 	pieceTextures[1] = loadTexture( gWhitePawn );

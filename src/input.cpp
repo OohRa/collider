@@ -42,13 +42,19 @@ bool userEntry(){
 		}
 		changeSide();
 		unmakeMove();
-		debugAll();
 		return false;
 	}
 
 	//Flip board command
 	if( input == "flip" ){
 		flipFlag = (flipFlag) ? false: true;
+		return false;
+	}
+
+	//Slow down display speed
+	if( input == "slow" ){
+		slowFlag = (slowFlag) ? false: true;
+		return false;
 	}
 
 	//Restart command
@@ -114,14 +120,13 @@ bool userEntry(){
    Basically takes input, checks it, and sets the official to and fr squares */
 void userInput(){
 	getInput();
+	std::cout << "Test 3\n";
 	if( stop ) return;
 	while( !checkLegal() || moveCheck() ){
 		displayAll();
 		getInput();
 		if( stop ) return;
 	}	
-	board.oldfrSq = board.frSq;
-	board.oldtoSq = board.toSq;
 	board.frSq = board.newfrSq;
 	board.toSq = board.newtoSq;	
 }	
@@ -132,6 +137,5 @@ void getInput(){
 		if( stop ) return;
 		displayAll();
 	}
-		
 	return;
 }

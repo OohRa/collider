@@ -6,8 +6,19 @@
 #include "debug.h"
 #include "display.h"
 #include "board.h"
+#include "eval.h"
 
 void boardDebug(){
+	std::cout << "\nBoard Debug\n";
+	for( int i = 120; i > 0; i-- ){
+		if( board.sq[i] < 10 && board.sq[i] >= 0 )
+			std::cout << " ";
+		std::cout << board.sq[i] << " ";
+		if( i % 10 == 0 ) 
+			nl(1);
+		
+	}
+	nl(1);
 }
 
 
@@ -138,10 +149,9 @@ void bitboardDebug(){
 }
 
 /* Search Code (FCD) */
-void checkDebug(){
+
+void debugVal(){
 	int square;
-	std::cout << "Debug All.\n";
-	nl(1);
 	std::cout << "Values.\n";
 	for( int rank = RANK_8; rank >= RANK_1; rank-- ){
 		for( int file = FILE_A; file <= FILE_H; file++){
@@ -152,6 +162,10 @@ void checkDebug(){
 		}
 		nl(1);
 	}
+}
+
+void debugColor(){
+	int square;
 	std::cout << "Colors.\n";
 	for( int rank = RANK_8; rank >= RANK_1; rank-- ){
 		for( int file = FILE_A; file <= FILE_H; file++){
@@ -160,6 +174,10 @@ void checkDebug(){
 		}
 		nl(1);
 	}
+}
+
+void debugType(){
+	int square;
 	std::cout << "Types.\n";
 	for( int rank = RANK_8; rank >= RANK_1; rank-- ){
 		for( int file = FILE_A; file <= FILE_H; file++){
@@ -168,6 +186,10 @@ void checkDebug(){
 		}
 		nl(1);
 	}
+}
+
+void debugMove(){
+	int square;
 	std::cout << "Moved.\n";
 	for( int rank = RANK_8; rank >= RANK_1; rank-- ){
 		for( int file = FILE_A; file <= FILE_H; file++){
@@ -176,6 +198,10 @@ void checkDebug(){
 		}
 		nl(1);
 	}
+}
+
+void debugLife(){
+	int square;
 	std::cout << "Alive.\n";
 	for( int rank = RANK_8; rank >= RANK_1; rank-- ){
 		for( int file = FILE_A; file <= FILE_H; file++){
@@ -184,30 +210,111 @@ void checkDebug(){
 		}
 		nl(1);
 	}
+}	
+
+void debugML(){
+	//Output Pawn movelist
+	int pawn = (board.side == WHITE) ? wPa: bPa;
+	for( int i = 0; i < 8; i++ ){
+		std::cout << "Pawn " << i + 1 << " movelist is: ";
+		for( int j = 0; j < pce[pawn].mL.size(); j++ ){
+			std::cout << pce[pawn].mL[j] << " ";
+		}
+		std::cout << "\n";
+		pawn++;
+	}
 	
-	std::cout << "Movelist.\n";
-	for( int i = 0; i < board.mL.size(); i++ ){
-		std::cout << board.mL[i] << " ";
-		if( i % 8 == 0 )
-			std::cout << "\n";
+	//Output Knight movelist
+	int knight = (board.side == WHITE) ? wqN: bqN;
+	int change = 5;
+	for( int j = 0; j < 2; j++ ){
+		std::cout << "Knight Movelist is: ";
+		for( int i = 0; i < pce[knight].mL.size(); i++ ){
+			std::cout << pce[knight].mL[i] << " ";
+		}
+		knight +=change;
+		std::cout << "\n";
+	}
+
+	//Test output of movelists
+	int rook = (board.side == WHITE) ? wqR: bqR;
+	change = 7;
+	for( int i = 0; i < 2; i++){
+		std::cout << "The Rooks movelists are: "; 
+		for( int j = 0; j < pce[rook].mL.size(); j++ ){
+			std::cout << pce[rook].mL[j] << " ";
+		}
+		std::cout << "\n";
+		rook += change;
 	}
 	nl(1);
 
+	//Test output of movelists
+	int king = (board.side == WHITE) ? wK: bK;
+	std::cout << "The King movelist are: "; 
+	for( int j = 0; j < pce[king].mL.size(); j++ ){
+		std::cout << pce[king].mL[j] << " ";
+	}
+	nl(2);
+	
+	//Test output of movelists
+	int bishop = (board.side == WHITE) ? wqB: bqB;
+	change = 3;
+	for( int i = 0; i < 2; i++){
+		std::cout << "The Bishop movelists are: "; 
+		for( int j = 0; j < pce[bishop].mL.size(); j++ ){
+			std::cout << pce[bishop].mL[j] << " ";
+		}
+		std::cout << "\n";
+		bishop += change;
+	}
+	nl(1);
+
+	//Output queen movelist
+	int queen = (board.side == WHITE) ? wQ: bQ;
+	std::cout << "Queens movelist: ";
+	for( int i = 0; i < pce[queen].mL.size(); i++ ){
+		std::cout << pce[queen].mL[i] << " ";
+	}
+	nl(2);
+
+
+	//Output movelist
+	std::cout << "Movelist.\n";
+	for( int i = 1; i < board.mL.size() + 1; i++ ){
+		std::cout << board.mL[i - 1] << " ";
+		if( i % 8 == 0 )
+			std::cout << "\n";
+	}
+	nl(2);
+
 	std::cout << "Undolist.\n";
-	for( int i = 0; i < undo.size(); i++){
-		std::cout << undo[i].move << " ";
+	for( int i = 1; i < undo.size() + 1; i++){
+		std::cout << undo[i - 1].move << " ";
 		if( i % 8 == 0 )
 			nl(1);
 	}
 	nl(1);
 }
 
+void debugEval(){
+	int score = 0;
+	int mult;
+	mult = (board.side == WHITE) ? 1: -1;
+	score = eval() * mult;
+	std::cout << "Current Board Evaluation: " << score << "\n";
+}
 /* debugAll function
  * Used for general debugging 
  * Search Code (FDA)		*/
 void debugAll(){
-	//boardDebug();
+	boardDebug();
 	//bitboardDebug();
-	checkDebug();
+	debugVal();
+	debugColor();
+	debugType();
+	debugLife();
+	debugMove();
+	debugML();
 }
 

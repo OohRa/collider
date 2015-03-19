@@ -20,7 +20,7 @@ void makeMove(){
 	int diff = board.toSq - board.frSq;
 	if( getType(board.frSq) == KING && abs(diff) == 2 && !genFlag ){
 		cFlag = true;
-		std::cout << "We castling!\n";
+		//std::cout << "We castling!\n";
 	}
 	else if( getType(board.frSq) == PAWN && board.toSq == board.enPas && (abs(diff) == 11 || abs(diff) == 9) ){
 		eFlag = true;
@@ -28,7 +28,7 @@ void makeMove(){
 	}
 	else if( getType(board.frSq) == PAWN && (board.toSq / 10 == 9 || board.toSq / 10 == 2) ){
 		pFlag = true;
-		//std::cout << "We promoting!\n";
+		std::cout << "We promoting!\n";
 	}
 	else if( getType(board.frSq) == PAWN && abs(diff) == 20 ){
 		sFlag = true;
@@ -419,14 +419,14 @@ void moveGen(std::vector<int>& moveList){
 	moveList.clear();
 	for( int i = 0; i < 16; i++ ){
 		if( piece == 5 ){
-			std::cout << "Adding white kings moves!\n";
-			for( int p = 0; p < pce[wK].mL.size(); p++ ){
-				std::cout << pce[wK].mL[p] << " ";
-			}
+			//std::cout << "Adding white kings moves!\n";
+			//for( int p = 0; p < pce[wK].mL.size(); p++ ){
+				//std::cout << pce[wK].mL[p] << " ";
+			//}
 		}
 		if( pce[piece].life == false ){
 			piece++;
-			std::cout << "That piece is dead: " << piece << "\n";
+			//std::cout << "That piece is dead: " << piece << "\n";
 			continue;
 		}
 		for( int j = 0; j < pce[piece].mL.size(); j++ ){
@@ -444,8 +444,8 @@ void moveGen(std::vector<int>& moveList){
 		piece++;
 	}	
 	
-	if( board.side == WHITE )
-		debugAll();
+	//if( board.side == WHITE )
+		//debugAll();
 
 	//Disable sorting until bugs are fixed
 	//sortML(moveList);	
@@ -627,8 +627,8 @@ void genQueen(){
 
 	//Loop for queen
 	for( int i = 0; i < 9; i++ ){
-		if (queen == wK || queen == bK)
-			std::cout << "WHAT THE FUCK i: " << i << '\n';
+		//if (queen == wK || queen == bK)
+			//std::cout << "WHAT THE FUCK i: " << i << '\n';
 		if( pce[queen].type == QUEEN ) 
 			pce[queen].mL.clear();
 		qSq = pce[queen].pos;
@@ -661,7 +661,7 @@ void genQueen(){
 			}
 		}		
 		if( queen != wQ && queen != bQ ){
-			std::cout << "Queen is: " << queen << "\n";
+			//std::cout << "Queen is: " << queen << "\n";
 			queen++;
 		}
 		else queen += 5;
@@ -679,7 +679,7 @@ void genKing(){
 	pce[king].mL.clear();
 	kSq = pce[king].pos;
 	if( !pce[king].life ){
-		std::cout << "King is dead. GAME OVER\n";
+		//std::cout << "King is dead. GAME OVER\n";
 		return;
 	}
 	//Loop for directions
@@ -688,8 +688,8 @@ void genKing(){
 		for( int checkSq = kSq + slide[j]; board.sq[checkSq] != OFFBOARD; checkSq += slide[j]){
 			if( getColor(checkSq) == EMPTY ){
 				pce[king].mL.push_back((kSq * 100) + checkSq);
-				std::cout << "Generating king move!\n";
-				std::cout << "King is: " << king << "\n";
+				//std::cout << "Generating king move!\n";
+				//std::cout << "King is: " << king << "\n";
 				break;
 			}
 			else if( getColor(checkSq) == OFFBOARD )
@@ -720,16 +720,16 @@ void genCastle(){
 	board.newfrSq = kingSq;
 	
 	//Test
-	std::cout << "Test in genCastle!\n";
+	//std::cout << "Test in genCastle!\n";
 	
 	//Check kingside
 	board.newtoSq = kingSq + 1;
 	if(  getColor(board.newtoSq) == EMPTY && getColor(board.newtoSq + 1) == EMPTY && checkCastle() ){
 		//std::cout << "Gen castle kingside!\n";
 		pce[king].mL.push_back((kingSq * 100 ) + (kingSq + 2));
-		std::cout << "mL back: " << pce[king].mL.back() << '\n';
-		std::cout << "King is: " << king << "\n";
-		std::cout << "Castling generated!\n";
+		//std::cout << "mL back: " << pce[king].mL.back() << '\n';
+		//std::cout << "King is: " << king << "\n";
+		//std::cout << "Castling generated!\n";
 	}
 
 	//Check queenside

@@ -13,6 +13,10 @@ extern int life;
 
 //Globals
 extern bool undoFlag;
+extern bool flipFlag;
+extern bool slowFlag;
+extern bool genFlag;
+extern int ply;
 
 //DEFINITIONS
 
@@ -37,6 +41,8 @@ enum {  EMPTY,
 	bqR, bqN, bqB,  bQ,  bK, bkB, bkN, bkR,
 	bPa, bPb, bPc, bPd, bPe, bPf, bPg, bPh  }; 
 	
+enum { NOVAL = 0, PVAL = 100, NVAL = 400, BVAL = 380, RVAL = 600,
+       QVAL = 1250, KVAL = 9999 };
 
 /* Constants for File and Rank */
 
@@ -76,7 +82,6 @@ enum { FALSE, TRUE };
 
 struct boardStruct
 {
-	
 	int side;
 	
 	int newfrSq;
@@ -84,22 +89,6 @@ struct boardStruct
 
 	int frSq;
 	int toSq;
-
-	int oldfrSq;
-	int oldtoSq;
-
-	int oldPiece;
-	int oldVal;
-
-	int storePiece;
-	int storeSq;
-	
-	int enpasFlag;
-
-	int ply;
-	int oppPly;
-
-	int kingSq;
 	
 	int sq[SQNUM];
 	int sq64[64];
@@ -107,6 +96,7 @@ struct boardStruct
 	bool castling;
 	int enPas;
 	std::vector<int> mL;
+	std::vector<int> score;
 };	
 
 struct pieceStruct
@@ -144,6 +134,11 @@ struct bitboardStruct
 	U64 occupiedSquares;
 	U64 emptySquares; 
 
+	U64 oppPawn;
+	U64 ownPieces;
+	U64 rank[8];
+	U64 file[8];
+
 };
 
 
@@ -158,17 +153,16 @@ struct undoStruct
 {
 	int move;
 	int enPas;
-	int storePiece;
-	int storeVal;
-}
+	int piece;
+};
 
 //Globals
 extern boardStruct board;
 extern pieceStruct pce[33];
-extern indexStruct indexArray;
+extern indexStruct indexA;
 extern bitboardStruct bb;
 extern bool stop;
-extern undoStruct std::vector<int> undo;
+extern std::vector<undoStruct> undo;
 //MACROS
 
 /*

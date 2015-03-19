@@ -18,24 +18,50 @@
 #include "debug.h"
 #include "board.h"
 #include "sdl.h"
+#include "eval.h"
+#include "search.h"
 
 int life;
 
 int main(){	
 	/* Main game loop */
 	initializeAll();
-	debugAll();
-	displayAll();
 	while( !stop ){
+		displayAll();
+		engine();
+		debugAll();
+		displayAll();
+		std::cout << "Test 1\n";
 		userInput();
+		std::cout << "Test 2\n";
 		if( stop )
 			 return 0;
 		makeMove();
 		changeSide();
-		displayAll();	
 	}
 	closeSDL();
 	return 0;
+
+/*
+	initializeAll();
+	while( !stop ){
+		displayAll();
+		engine();
+		//SDL_Delay(1000);
+	}
+	closeSDL();
+	return 0;
+*/		
+/*
+	initializeAll();
+	for( int i = 1; i < 121; i++ ){
+		if( board.sq[i-1] < 10 && board.sq[i-1] > 0 )
+			std::cout << " ";
+		std::cout << board.sq[i- 1] << " ";
+		if( i % 10 == 0 )
+			std::cout << "\n";
+	}
+*/
 }
 
 

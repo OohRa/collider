@@ -186,7 +186,18 @@ int displayGraphics(){
 			case 32: showPiece = gBP; break;
 			default: printf("?");
 		}
-		if( !flipFlag ){
+		
+		//For promoted pawns
+		if((( showPiece >= wPa && showPiece <= wPh ) || ( showPiece >= bPa && showPiece <= bPh )) && pce[showPiece].type == QUEEN ){
+			if( pce[showPiece].color == WHITE )
+				showPiece = wQ;
+			else if( pce[showPiece].color == BLACK )	
+				showPiece = bQ;
+			else 
+				std::cout << "AGH HELP!";
+		}
+
+		 if( !flipFlag ){
 			rSquare = { (file * 75), ((7-rank) * 75), 75, 75 };
 		}
 		else
@@ -199,7 +210,6 @@ int displayGraphics(){
 		colorCount++;
 	}
 	SDL_RenderPresent(gRenderer);
-
 	return 0;
 }
 

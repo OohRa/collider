@@ -1,4 +1,4 @@
-FILES = board.cpp initial.cpp display.cpp move.cpp input.cpp legal.cpp debug.cpp bitboards.cpp sdl.cpp collider.cpp 
+FILES = board.cpp initial.cpp display.cpp move.cpp input.cpp legal.cpp debug.cpp bitboards.cpp sdl.cpp eval.cpp search.cpp collider.cpp 
 
 SDL = -framework SDL2 -framework SDL2_image
 
@@ -8,7 +8,7 @@ EXECUTABLE = collider
 
 CXX = clang++
 
-CXXFLAGS = -Wall -pedantic -ferror-limit=256 -std=c++11 -c -I../include/  
+CXXFLAGS = -Wall -g -pedantic -ferror-limit=256 -std=c++11 -c -I../include/  
 
 LDFLAGS = $(SDL)
 

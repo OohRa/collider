@@ -14,7 +14,7 @@ int getColor( int sq ){
 	sqVal = getPiece( sq );
 
 	//Check for color
-	if( sqVal >= wqR && sqVal <= wPh )      //White pieces
+	if( sqVal >= wqR && sqVal <= wPh )      //White piece
 		 return WHITE;
 	else if( sqVal >= bqR && sqVal <= bPh ) //Black Pieces
 		 return BLACK;
@@ -60,3 +60,27 @@ int getType ( int sq ){
 	return type;
 }
 
+int getValue( int sq ){
+	int val;
+
+	switch(getType(sq)){
+		case PAWN: val = PVAL; break;
+		case KNIGHT: val = NVAL; break;
+		case BISHOP: val = BVAL; break;
+		case ROOK: val = RVAL; break;
+		case QUEEN: val = QVAL; break;
+		case KING: val = KVAL; break;
+		default: val = NOVAL; 
+	}
+	
+	return val;
+}
+
+void setMove( std::vector<int>& moveList, int index ){
+	board.frSq = moveList[index]/100;
+	board.toSq = moveList[index]%100;
+	if( board.frSq < 20 || board.frSq > 98 )
+		std::cout << "frSq Error in setMove!: " << board.frSq << "\n";
+	if( board.toSq < 20 || board.toSq > 98 )
+		std::cout << "toSq Error in setMove!: " << board.toSq << "\n";
+}
