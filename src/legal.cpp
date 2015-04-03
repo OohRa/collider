@@ -347,6 +347,7 @@ bool checkCheck(){
 					if( abs(indexSq - kingSq) < 11 ){
 						return true;
 					}
+					else break;
 				}
 				if( toType == PAWN ){	
 					if( (abs(indexSq - kingSq) == 9 || abs(indexSq - kingSq) == 11) && toType == PAWN ){
@@ -361,17 +362,19 @@ bool checkCheck(){
 							}
 						}
 					}
-					break;
+					else break;
 				}
 				if( toType == BISHOP || toType == QUEEN ){
 					if( abs(slide) % 9 == 0 || abs(slide) % 11 == 0 ){
 						return true;
 					}
+					else break;
 				}
 				if( toType == ROOK || toType == QUEEN ){
 					if( abs(slide) % 10 == 0 || slide == RT || slide == LEFT ){
 						return true;
 					}
+					else break;
 				}
 			}
 		}
