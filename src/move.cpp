@@ -323,6 +323,9 @@ void moveGen(std::vector<int>& moveList, bool caps){
 		}
 		piece++;
 	}	
+
+	//Sort captures
+	sortCaps( moveList );
 	
 	if( !caps ){
 		//Fill board movelist with pieces movelists
@@ -682,40 +685,45 @@ void genCastle(){
 	board.newtoSq = toSq;
 }
 
-void sortML( std::vector<int> & sortmL ){
+//sortCaps
+//Sort captures by least attacker and greatest defender (LAGD)
+void sortCaps( std::vector<int> & sortCaps ){
 	std::vector<int> score;
 
 	score.clear();
 	
-	//Generate all scores first
-	for(int i = 0; i < sortmL.size(); i++ ){
-		setMove(sortmL, i);
-		makeMove();
-		score.push_back(eval());
-		unmakeMove();
+	//Generate all differences first
+	for(int i = 0; i < sortCaps.size(); i++ ){
+		score.push_back(pce[getPiece(sortCaps[i]/100)].value - pce[getPiece(sortCaps[i]%100)].value);
 	}	
+
 	//Test	
 	//std::cout << "movelist size is: " << sortmL.size() << "\n";
 	//std::cout << "scorelist size is: " << score.size() << "\n";	
-	if( sortmL.size() == 0 ) 
+	if( sortCaps.size() == 0 ) 
 		return;
 	//Sort them
 	int count, store;
 	do{
 		count = 0;
-		for( int i = 0; i < sortmL.size() - 1; i++ ){
+		for( int i = 0; i < sortCaps.size() - 1; i++ ){
 			if( score[i + 1] > score[i] ){
 				store = score[i];
 				score[i] = score[i + 1];
 				score[i + 1] = store;
-				store = sortmL[i];
-				sortmL[i] = sortmL[i + 1];
-				sortmL[i + 1] = store;
+				store = sortCaps[i];
+				sortCaps[i] = sortCaps[i + 1];
+				sortCaps[i + 1] = store;
 				count++; 
 			}
 		} 
 	}while( count > 0 );
 	
+
+}
+
+void sortML( std::vector<int> & sortmL ){
+	//Placeholder until I come up with an efficient algorithm
 }
 
 void genCaps( std::vector mL ){
