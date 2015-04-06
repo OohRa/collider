@@ -8,10 +8,30 @@
 #include "legal.h"
 #include "debug.h"
 #include "eval.h"
+#include "sdl.h"
 
 //(VMM)
 void makeMove(){
 	//std::cout << "In makeMove()\n";
+	//TEST
+	if( board.sq[99] != -1 ){
+		std::cout << "Sq 99 is not offboard anymore. In make\n";
+		std::cout << "frSq: " << board.frSq << "\n";
+		std::cout << "toSq: " << board.toSq << "\n";
+		std::cout << "Piece: " << board.sq[board.frSq] << "\n";
+		debugAll();
+		SDL_Delay(10000);
+	}
+	//Test 2
+	if( board.toSq == 99 ){
+		std::cout << "Moving to square 99.\n";
+		std::cout << "frSq: " << board.frSq << "\n";
+		std::cout << "toSq: " << board.toSq << "\n";
+		std::cout << "Piece: " << board.sq[board.frSq] << "\n";
+		debugAll();
+		SDL_Delay(10000);
+	}
+	
 	ply++;
 	//Set all flags to false;
 	bool cFlag = false, eFlag = false, pFlag = false, sFlag = false;
@@ -28,7 +48,7 @@ void makeMove(){
 	}
 	else if( getType(board.frSq) == PAWN && (board.toSq / 10 == 9 || board.toSq / 10 == 2) ){
 		pFlag = true;
-		std::cout << "We promoting!\n";
+		//std::cout << "We promoting!\n";
 	}
 	else if( getType(board.frSq) == PAWN && abs(diff) == 20 ){
 		sFlag = true;
@@ -38,7 +58,16 @@ void makeMove(){
 	//Store values of squares
 	int piece = board.sq[board.frSq];
 	int value = board.sq[board.toSq];
-	
+
+	//Test
+	if( getType(board.frSq) == NOTYPE ){
+		std::cout << "BUG BUG BUG\n";
+		std::cout << "Piece is: " << piece << "\n"
+			  << "Move is: " << board.frSq << board.toSq << "\n"
+			  << "Type is: " << getType(board.frSq) << "\n"
+			  << "Type from piecelist is: " << pce[piece].type << "\n";
+		//debugAll();
+	}	
 	//Move piece
 	board.sq[board.frSq] = EMPTY;
 	board.sq[board.toSq] = piece;
@@ -52,6 +81,15 @@ void makeMove(){
 	pce[value].pos = DEAD;
 	pce[value].life = false;
 
+	//TEST
+	if( board.sq[99] != -1 ){
+		std::cout << "Sq 99 is not offboard anymore. In make before castle.\n";
+		std::cout << "frSq: " << board.frSq << "\n";
+		std::cout << "toSq: " << board.toSq << "\n";
+		std::cout << "Piece: " << board.sq[board.frSq] << "\n";
+		debugAll();
+		SDL_Delay(10000);
+	}
 	//Castling
 	if( cFlag ){
 		int rook = 0;
@@ -72,6 +110,15 @@ void makeMove(){
 		pce[rook].moved++;
 	}
 
+	//TEST
+	if( board.sq[99] != -1 ){
+		std::cout << "Sq 99 is not offboard anymore. In make after castle\n";
+		std::cout << "frSq: " << board.frSq << "\n";
+		std::cout << "toSq: " << board.toSq << "\n";
+		std::cout << "Piece: " << board.sq[board.frSq] << "\n";
+		debugAll();
+		SDL_Delay(10000);
+	}
 	//En Passant
 	else if( eFlag ){
 		int pawn = 0;
@@ -96,11 +143,13 @@ void makeMove(){
 	//Promotion
 	if( pFlag ){
 		pce[piece].type = QUEEN;
+		//std::cout << "Promoting piece is: " << piece << "\n";
+		//std::cout << "It's type is: " << pce[piece].type << "\n";
 		board.enPas = 117;
 	}
 
 	//Set enPassant square
-	if( sFlag ){
+	else if( sFlag ){
 		board.enPas = (board.side == WHITE) ? board.toSq - 10: board.toSq + 10;
 		//std::cout << "enPassant square is: " << board.enPas << "\n";
 	}
@@ -110,128 +159,16 @@ void makeMove(){
 	//Add to undo structure
 	undo.push_back({board.frSq * 100 + board.toSq, board.enPas, piece * 100 + value});
 
- /* Old makemove function
-	//std::cout << "TEST\n";
-	int piece = 0, toVal = 0;
-	board.oldfrSq = board.frSq;
-	board.oldtoSq = board.toSq;	
-	ply++;
-	
-	//Castling
-	if((getType(board.frSq) == KING && abs(board.toSq - board.frSq) == 2) && !genFlag){
-		if( !genFlag ){
-			int king, rook, diff, rookFrom = 0, rookTo = 0, kingTo = 0; 
-			toVal = 0;
-			diff = (board.toSq - board.frSq);
-			king = board.sq[board.frSq];
-			piece = king;
-	//std::cout << "TESTTEST\n";
-			//If diff is positive, then castling is kingside.
-			if( diff > 0){
-				 rookFrom = board.frSq + 3;
-				 rookTo = board.frSq + 1;
-				 kingTo = board.frSq + 2;
-			}
-
-			//likewise for queenside
-			else if( diff < 0){
-				rookFrom = board.frSq - 4;
-				rookTo = board.frSq - 1;
-				kingTo = board.toSq;
-			}
-			else
-				std::cout << "What is happening?\n";
-			rook = board.sq[rookFrom];
-			board.oldtoSq = kingTo;
-			board.storePiece = rook;
-			board.storeSq = rookFrom;
-			board.oldPiece = king;
-			board.oldVal = rook;
-
-			//Set positions and attributes of king and rook before move.
-			//piece = board.sq[board.frSq];
-			pce[piece].pos = kingTo;
-			pce[rook].pos = rookTo;
-			if( piece != EMPTY){
-				pce[piece].moved++;
-			}
-//std::cout << "TESTTESTTEST!\n";
-			if( rook != EMPTY )
-				pce[rook].moved++;
-			board.sq[board.frSq] = EMPTY;
-			board.sq[kingTo] = king;
-			board.sq[rookFrom] = EMPTY;
-			board.sq[rookTo] = rook;
-		}	
-	}	
-	
-	else{
-		int diff;
-		diff = board.toSq - board.frSq;
-		piece = board.sq[board.frSq];
-		toVal = board.sq[board.toSq];
-		board.oldPiece = piece;
-		board.oldVal = toVal;
-		board.sq[board.frSq] = EMPTY;
-		board.sq[board.toSq] = piece;
-	if( toVal < 0 || toVal > 32 ){
-		 std::cout << "WRONGWRONGWRONGWRONG!\n";
-		 std::cout << "toVal is: " << toVal << "\n";
-		 std::cout << "frSq: " << board.frSq << " toSq: " << board.toSq << "\n";
-		std::cout << "Piece: " << piece << "\n";
-		boardDebug();
-	}
-	//std::cout << "Piece is: " << piece << "\n";
-	//std::cout << "Before toVal is: " << toVal << "\n";
-	//std::cout << "frSq: " << board.frSq << " toSq: " << board.toSq << "\n";
-		pce[toVal].pos = DEAD;
-	//std::cout << "After toVal\n";
-		pce[toVal].life = false;
-	//std::cout << "TESTTESTTESTTEST!!!\n";
-		//Quick cover for promotions
-		if( getType(board.toSq) == PAWN && (board.toSq > 91 || board.toSq < 31) ){
-			pce[board.sq[board.toSq]].type = QUEEN;
-		} 
-		//Remove the capture enPassant pawn
-		if( (abs(board.toSq - board.frSq) == 11 ||  abs(board.toSq - board.frSq) ) && getType(board.toSq) == PAWN && toVal == EMPTY){
-			int enPiece, enSq;
-			if( diff > 0 ){
-				enPiece = board.sq[board.toSq - 10];
-				enSq = board.toSq - 10;
-				board.sq[board.toSq - 10] = EMPTY;
-				pce[enPiece].pos = DEAD;
-				pce[enPiece].life = false;
-			}
-			else {
-				enSq = board.toSq + 10;
-				enPiece = board.sq[board.toSq + 10];
-				board.sq[board.toSq + 10] = EMPTY;
-				pce[enPiece].pos = DEAD;
-				pce[enPiece].life = false;
-			}
-			board.storePiece = enPiece;
-			board.storeSq = enSq;
-			board.enpasFlag = true;
-		}
-
-		pce[piece].pos = board.toSq;
-		if( piece != EMPTY )
-			pce[piece].moved++;
-		life++;
+	//TEST
+	if( board.sq[99] != -1 ){
+		std::cout << "Sq 99 is not offboard anymore. end of make\n";
+		std::cout << "frSq: " << board.frSq << "\n";
+		std::cout << "toSq: " << board.toSq << "\n";
+		std::cout << "Piece: " << board.sq[board.frSq] << "\n";
+		debugAll();
+		SDL_Delay(10000);
 	}
 
-	
-	//Create an enpassant square for the future
-	if( getType(board.toSq) == PAWN && abs(board.toSq - board.frSq) == 20 ){
-		int diff = board.toSq - board.frSq;	
-		if(diff > 0) board.enPas = board.toSq - 10;
-		else board.enPas = board.toSq + 10;
-	}
-	else board.enPas = 0;
-
-	undo.push_back({(board.frSq * 100 + board.toSq), board.enPas, (piece * 100) + toVal});
-//std::cout << "TESTTESTEND!!\n";
-*/
 }
 
 //(VUM)
@@ -240,13 +177,25 @@ void unmakeMove(){
 	ply--;	
 	bool cFlag = false, eFlag = false, pFlag = false;
 	int diff = 0, piece, value;
-	
+	int promote = 0;	
+
 	//Set squares to use from undo vector
 	board.frSq = undo[undo.size() - 1].move/100;
 	board.toSq = undo[undo.size() - 1].move%100;
 	piece = undo[undo.size() - 1].piece/100;
 	value = undo[undo.size() - 1].piece%100;
 	board.enPas = undo[undo.size() - 2].enPas;
+	promote = undo[undo.size() - 1].enPas;
+	
+	//std::cout << "Promote is: " << promote << "\n";
+	//std::cout << "Type of toSq is: " << getType(board.toSq) << "\n";
+	//Test
+	if( board.toSq > 98 || board.toSq < 21 ){
+		std::cout << "Move bound error in unmake!\n";
+		std::cout << "The move is: " << board.frSq << board.toSq << "\n";
+		debugAll();
+		SDL_Delay(10000);
+	}
 
 	diff = board.toSq - board.frSq;
 	
@@ -255,11 +204,13 @@ void unmakeMove(){
 		cFlag = true;
 	if( getType(board.toSq) == PAWN && (abs(diff) == 11 || abs(diff) == 9) && value == EMPTY ){
 		eFlag = true; 
-		//std::cout << "unmaking enPassant!\n";
+		//std::cout << "unPassanting!\n";
 	}
 	//Add promotion square later
-	if( board.enPas == 117 )
+	if( promote == 117 && getType(board.toSq) == QUEEN ){
+		//std::cout << "unPromoting!\n";
 		pFlag = true; 
+	}
 
 	//Unmake move
 	board.sq[board.frSq] = piece;
@@ -312,90 +263,14 @@ void unmakeMove(){
 		pce[piece].type = PAWN;
 		//std::cout << "No cover for promotions yet!\n";
 	}
-
-	undo.pop_back();
-/* Old unmake function 
-	//Unmake castling
-	if((getType(board.toSq) == KING && abs(board.toSq - board.frSq) == 2 ) && !genFlag){
-		if( !genFlag ){
-			int kingSq, diff, king;
-			king = (board.side == WHITE) ? wK: bK;
-			(board.side == WHITE) ? kingSq = pce[wK].pos: kingSq = pce[bK].pos;
-			board.sq[board.toSq] = EMPTY;
-			board.sq[board.frSq] = board.oldPiece;
-			diff = board.toSq - board.frSq;
-			
-			if( diff > 0 ){
-				board.sq[board.frSq + 1] = EMPTY;
-				board.storeSq = kingSq + 1;
-				board.storePiece = king + 3;
-			}
-			else{
-				board.sq[board.frSq - 1] = EMPTY;
-				board.storeSq = kingSq - 2;
-				board.storePiece = king - 4;
-			}
-			board.sq[board.storeSq] = board.storePiece; 
-			pce[board.storePiece].pos = board.storeSq;
-			pce[board.oldPiece].pos = board.frSq;
-			if( board.oldPiece != EMPTY ){
-				pce[board.oldPiece].moved--;
-				if( getType(board.storeSq) != PAWN )
-					pce[board.storePiece].moved--;
-			}
-		}
-	}
-	else{ 
-		//Test
-		//std::cout << "Error check before bus crash!\n";
-		if( board.frSq < 21 || board.frSq > 98 ){
-			std::cout << "frSq error: " << board.frSq << "\n";
-		}
-		if( board.toSq < 21 || board.toSq > 98 ){
-			std::cout << "toSq error: " << board.toSq << "\n";
-		}
-		board.sq[board.toSq] = board.oldVal;
-		board.sq[board.frSq] = board.oldPiece;
-		if( board.oldVal == OFFBOARD )
-			std::cout << "Moving OFFBOARD\n";
-		pce[board.oldVal].pos = board.toSq;
-		if( board.oldVal != EMPTY )
-			pce[board.oldVal].life = true;
-		pce[board.oldPiece].pos = board.frSq;
-		
-		//Revert moves to before move was made for all non empty pieces
-		if( board.oldPiece != EMPTY )
-			if( pce[board.oldPiece].moved > 0 )
-				pce[board.oldPiece].moved--;
-		
-		//Enpassant undo
-		if( getType(board.frSq) == PAWN && getType(board.toSq) == EMPTY && (abs(board.toSq - board.frSq) == 11 || abs(board.toSq - board.frSq) == 9)){
-			if( abs(board.toSq - board.frSq) == 11 ){
-				if( board.side == WHITE )
-					 board.storeSq = board.frSq + 1;
-				else
-					 board.storeSq = board.frSq - 1;
-				
-			}
-			else if( abs(board.toSq - board.frSq) == 9 ){
-				if( board.side == WHITE )
-					board.storeSq = board.frSq - 1;
-				else
-					board.storeSq = board.frSq + 1;
-			}
-
-			board.storePiece = (board.side == WHITE) ? 24 + (board.storeSq % 10): 8 + (board.storeSq % 10);
-			board.sq[board.storeSq] = board.storePiece;
-			pce[board.storePiece].pos = board.storeSq;
-			pce[board.storePiece].life = true;
-			pce[board.storePiece].moved = 1;
-		}
-	}
-	undo.pop_back();
 	
-	board.enPas = undo[undo.size() - 1].enPas;
-	return;
-*/
+	//Test
+	if( board.sq[99] != OFFBOARD ){
+		std::cout << "Sq 99 isn't offboard, in unmake!\n";
+		debugAll();
+		SDL_Delay(10000);
+	}
+	undo.pop_back();
 }
 
 void changeSide(){	
@@ -403,7 +278,7 @@ void changeSide(){
 	return;
 }
 
-void moveGen(std::vector<int>& moveList){
+void moveGen(std::vector<int>& moveList, bool caps){
 	int piece;
 
 	genPawn();
@@ -411,12 +286,14 @@ void moveGen(std::vector<int>& moveList){
 	genBishop();
 	genRook();
 	genKing();
-	genCastle();
-	genQueen();
-	
-	//Fill board movelist with pieces movelists
+
+	//Don't call genCastle if king is off initial square
+	if( (board.side == WHITE && pce[wK].pos == 25) || (board.side == BLACK && pce[bK].pos == 95) )
+		genCastle();
+	genQueen( );
+
 	piece = (board.side == WHITE) ? wqR: bqR;
-	moveList.clear();
+	//Add captures first
 	for( int i = 0; i < 16; i++ ){
 		if( piece == 5 ){
 			//std::cout << "Adding white kings moves!\n";
@@ -429,9 +306,12 @@ void moveGen(std::vector<int>& moveList){
 			//std::cout << "That piece is dead: " << piece << "\n";
 			continue;
 		}
-		for( int j = 0; j < pce[piece].mL.size(); j++ ){
+		for( int j = 0; j < pce[piece].caps.size(); j++ ){
 			if( pce[piece].mL[j] % 100 < 21 || pce[piece].mL[j] % 100 > 98 ){
 				std::cout << "Move Gen toSq Error: " << pce[piece].mL[j] << "\n";
+				std::cout << "Piece is: " << piece << "\n";
+				debugAll();
+				SDL_Delay(10000);
 			}
 			/*	
 			if( pce[piece].mL[j] > 10000 || pce[piece].mL[j] < 2000 ){
@@ -439,11 +319,45 @@ void moveGen(std::vector<int>& moveList){
 				std::cout << "Piece is: " << piece << "\n";
 			}
 			*/
-			moveList.push_back(pce[piece].mL[j]);
+			moveList.push_back(pce[piece].caps[j]);
 		}
 		piece++;
 	}	
 	
+	if( !caps ){
+		//Fill board movelist with pieces movelists
+		piece = (board.side == WHITE) ? wqR: bqR;
+		moveList.clear();
+		for( int i = 0; i < 16; i++ ){
+			if( piece == 5 ){
+				//std::cout << "Adding white kings moves!\n";
+				//for( int p = 0; p < pce[wK].mL.size(); p++ ){
+					//std::cout << pce[wK].mL[p] << " ";
+				//}
+			}
+			if( pce[piece].life == false ){
+				piece++;
+				//std::cout << "That piece is dead: " << piece << "\n";
+				continue;
+			}
+			for( int j = 0; j < pce[piece].mL.size(); j++ ){
+				if( pce[piece].mL[j] % 100 < 21 || pce[piece].mL[j] % 100 > 98 ){
+					std::cout << "Move Gen toSq Error: " << pce[piece].mL[j] << "\n";
+					std::cout << "Piece is: " << piece << "\n";
+					debugAll();
+					SDL_Delay(10000);
+				}
+				/*	
+				if( pce[piece].mL[j] > 10000 || pce[piece].mL[j] < 2000 ){
+					std::cout << "Move Gen Error: " << pce[piece].mL[j] << "\n";
+					std::cout << "Piece is: " << piece << "\n";
+				}
+				*/
+				moveList.push_back(pce[piece].mL[j]);
+			}
+			piece++;
+		}	
+	}	
 	//if( board.side == WHITE )
 		//debugAll();
 
@@ -470,12 +384,12 @@ void genPawn(){
 
 	for( int i = 0;  i < 8; i++ ){
 		pce[pawn].mL.clear();
+		pce[pawn].caps.clear();
 		if( pce[pawn].life == false ){
 			pawn++;
 			continue;
 		}
 		pSq = pce[pawn].pos;
-
 		for( int j = 0; j < 2; j++ ){
 			toSq = pSq + slide[j];
 			if( pce[pawn].moved != 0 && abs(slide[j]) == 20 ){
@@ -487,19 +401,20 @@ void genPawn(){
 			else 
 				pce[pawn].mL.push_back(( pSq * 100 ) + toSq );
 		}
+	
 
 		for( int j = 2; j < 4; j++ ){
 			toSq = pSq + slide[j];
 			
 			if( (board.enPas == toSq) && (((board.side ==  WHITE && board.enPas / 10 == 7)) || ((board.side == BLACK && board.enPas / 10 == 4)))){
-				pce[pawn].mL.push_back(( pSq * 100 ) + toSq );
+				pce[pawn].caps.push_back(( pSq * 100 ) + toSq );
 				continue;
 			}
 
 			if( getColor(toSq) == EMPTY || getColor(toSq) == OFFBOARD )
 				continue;
 			else if( getColor(toSq) != board.side ){
-				pce[pawn].mL.push_back(( pSq * 100 ) + toSq );
+				pce[pawn].caps.push_back(( pSq * 100 ) + toSq );
 				continue;
 			}
 			else 
@@ -521,8 +436,11 @@ void genRook(){
 	//Loop for both rooks
 	for( int i = 0; i < 2; i++){
 		pce[rook].mL.clear();
-		if( pce[rook].life == false )
+		pce[rook].caps.clear();
+		if( pce[rook].life == false ){
+			rook += change;
 			continue;
+		}
 		rSq = pce[rook].pos;
 		if( pce[rook].pos < 21 || pce[rook].pos > 98 ){
 			std::cout << "Rook position error: " << pce[rook].pos << "\n";
@@ -532,21 +450,22 @@ void genRook(){
 		for( int j = 0; j < 4; j++ ){
 			//Loop for individual squares
 			for( int checkSq = rSq + slide[j]; board.sq[checkSq] != OFFBOARD; checkSq += slide[j]){
-				if( getColor(checkSq) == EMPTY ){
-					pce[rook].mL.push_back((rSq * 100) + checkSq);
-					continue;
-				}
-				else if( getColor(checkSq) == OFFBOARD )
-					break;
-				else if( getColor(checkSq) != board.side ){
-					pce[rook].mL.push_back((rSq * 100) + checkSq);
-					break;
-				}
-				else if( getColor(checkSq) == board.side ){
-					break;
-				}
-				else 
-					pce[rook].mL.push_back((rSq * 100) + checkSq);
+					if( getColor(checkSq) == EMPTY ){
+						pce[rook].mL.push_back((rSq * 100) + checkSq);
+						continue;
+					}
+					else if( getColor(checkSq) == OFFBOARD )
+						break;
+					else if( getColor(checkSq) != board.side ){
+						pce[rook].caps.push_back((rSq * 100) + checkSq);
+						break;
+					}
+					else if( getColor(checkSq) == board.side ){
+						break;
+					}
+					else 
+						pce[rook].mL.push_back((rSq * 100) + checkSq);
+				
 			}
 		}		
 		if(!i)
@@ -564,13 +483,20 @@ void genKnight(){
 	//Fill with possible squares	
 	for( int i = 0; i < 2; i++ ){
 		pce[knight].mL.clear();
-		if( pce[knight].life == false )
+		pce[knight].caps.clear();
+		if( pce[knight].life == false ){
+			knight += change;
 			continue;
+		}
+		if( pce[knight].type == NOTYPE )
+			std::cout << "MOVEGENBUGKNIGHTS!\n";
 		nSq = pce[knight].pos;
 		for( int j = 0; j < 8; j++ ){
 			int checkSq = nSq + jump[j];
-			if( getColor(checkSq) != board.side && board.sq[checkSq] != OFFBOARD && checkSq != 0 )
+			if( getColor(checkSq) == EMPTY )
 				pce[knight].mL.push_back((nSq * 100) + checkSq);
+			else if( getColor(checkSq) != board.side && board.sq[checkSq] != OFFBOARD && checkSq != 0 )
+				pce[knight].caps.push_back((nSq * 100) + checkSq);
 		}
 		if(!i)
 			knight += change;
@@ -590,8 +516,11 @@ void genBishop(){
 	//Loop for both bishop
 	for( int i = 0; i < 2; i++){
 		pce[bishop].mL.clear();
-		if( pce[bishop].life == false )
+		pce[bishop].caps.clear();
+		if( pce[bishop].life == false ){
+			bishop += change;
 			continue;
+		}
 		bSq = pce[bishop].pos;
 		//Loop for directions
 		for( int j = 0; j < 4; j++ ){
@@ -604,7 +533,7 @@ void genBishop(){
 				else if( getColor(checkSq) == OFFBOARD )
 					break;
 				else if( getColor(checkSq) != board.side ){
-					pce[bishop].mL.push_back((bSq * 100) + checkSq);
+					pce[bishop].caps.push_back((bSq * 100) + checkSq);
 					break;
 				}
 				else if( getColor(checkSq) == board.side ){
@@ -631,6 +560,7 @@ void genQueen(){
 			//std::cout << "WHAT THE FUCK i: " << i << '\n';
 		if( pce[queen].type == QUEEN ) 
 			pce[queen].mL.clear();
+			pce[queen].caps.clear();
 		qSq = pce[queen].pos;
 		if( pce[queen].life == false || pce[queen].type != QUEEN ){ 
 			if( queen != wQ && queen != bQ )
@@ -650,7 +580,7 @@ void genQueen(){
 				else if( getColor(checkSq) == OFFBOARD )
 					break;
 				else if( getColor(checkSq) != board.side ){
-					pce[queen].mL.push_back((qSq * 100) + checkSq);
+					pce[queen].caps.push_back((qSq * 100) + checkSq);
 					break;
 				}
 				else if( getColor(checkSq) == board.side ){
@@ -677,6 +607,7 @@ void genKing(){
 
 	//Loop for king
 	pce[king].mL.clear();
+	pce[king].caps.clear();
 	kSq = pce[king].pos;
 	if( !pce[king].life ){
 		//std::cout << "King is dead. GAME OVER\n";
@@ -686,24 +617,26 @@ void genKing(){
 	for( int j = 0; j < 8; j++ ){
 		//Loop for individual squares
 		for( int checkSq = kSq + slide[j]; board.sq[checkSq] != OFFBOARD; checkSq += slide[j]){
-			if( getColor(checkSq) == EMPTY ){
+			if( board.sq[checkSq] == EMPTY ){
 				pce[king].mL.push_back((kSq * 100) + checkSq);
 				//std::cout << "Generating king move!\n";
 				//std::cout << "King is: " << king << "\n";
 				break;
 			}
-			else if( getColor(checkSq) == OFFBOARD )
+			else if( board.sq[checkSq] == OFFBOARD )
 				break;
 			else if( getColor(checkSq) != board.side ){
-				pce[king].mL.push_back((kSq * 100) + checkSq);
+				pce[king].caps.push_back((kSq * 100) + checkSq);
 				break;
 			}
 			else if( getColor(checkSq) == board.side ){
 				break;
 			}
-			else 
+			else{ 
 				pce[king].mL.push_back((kSq * 100) + checkSq);
+				std::cout << "Else king addition!\n";
 				break;
+			}
 			
 		}
 	}		
@@ -721,10 +654,15 @@ void genCastle(){
 	
 	//Test
 	//std::cout << "Test in genCastle!\n";
+
+	//Check that king starts on initial square
+	//if( kingSq != 25 || kingSq != 95 )
+	//	return;  
 	
 	//Check kingside
 	board.newtoSq = kingSq + 1;
-	if(  getColor(board.newtoSq) == EMPTY && getColor(board.newtoSq + 1) == EMPTY && checkCastle() ){
+	if(  getColor(board.newtoSq) == EMPTY && board.sq[board.newtoSq + 1] == EMPTY && checkCastle() ){
+
 		//std::cout << "Gen castle kingside!\n";
 		pce[king].mL.push_back((kingSq * 100 ) + (kingSq + 2));
 		//std::cout << "mL back: " << pce[king].mL.back() << '\n';
@@ -778,4 +716,112 @@ void sortML( std::vector<int> & sortmL ){
 		} 
 	}while( count > 0 );
 	
+}
+
+void genCaps( std::vector mL ){
+	genPawnCaps();
+	genKnightCaps();
+	genBishopCaps();
+	genRookCaps();
+	genQueenCaps();
+	genKingCaps();
+}
+
+//genPawnCaps
+//Clears movelist then generates only captures
+void genPawnCaps(){
+	int pawn = (board.side == WHITE) ? wPa: bPa;
+	int toSq, pSq;
+	int slide[2];
+	if( board.side == WHITE ){
+		slide[0] = 9;
+		slide[1] = 11;
+	}
+	else{
+		slide[0] = -9;
+		slide[1] = -11;
+	}
+
+	for( int i = 0;  i < 8; i++ ){
+		pce[pawn].mL.clear();
+		if( pce[pawn].life == false ){
+			pawn++;
+			continue;
+		}
+		pSq = pce[pawn].pos;
+		for( int j = 0; j < 2; j++ ){
+			toSq = pSq + slide[j];
+			if( (board.side == WHITE && getColor(toSq) == BLACK) || (board.side == BLACK && getColor(toSq) == WHITE))
+				pce[pawn].mL.push_back((pSq * 100) + toSq);
+		}
+
+		pawn++;		
+	}	
+	
+
+}
+
+//genKnightCaps
+//Generates only knight captures
+void genKnightCaps(){
+	int knight = (pow(board.side,4) + board.side);
+	int nSq;
+	int change = 5;
+	int jump[8] = { -21, -19, -12, -8, 8, 12, 19, 21 };
+
+	//Fill with possible squares	
+	for( int i = 0; i < 2; i++ ){
+		pce[knight].mL.clear();
+		if( pce[knight].life == false ){
+			knight += change;
+			continue;
+		}
+		if( pce[knight].type == NOTYPE )
+			std::cout << "MOVEGENBUGKNIGHTS!\n";
+		nSq = pce[knight].pos;
+		for( int j = 0; j < 8; j++ ){
+			int checkSq = nSq + jump[j];
+			if( getColor(checkSq) != board.side && board.sq[checkSq] != OFFBOARD && checkSq != 0 )
+				pce[knight].mL.push_back((nSq * 100) + checkSq);
+		}
+		if(!i)
+			knight += change;
+	}
+
+	knight -= change;
+
+	return;
+
+}
+
+//genBishopCaps
+//Generates only bishop captures
+void genBishopCaps(){
+
+}
+
+//genRookCaps
+//Gen only rook caps
+void genRookCaps(){
+
+}
+
+//genQueenCaps
+//Gen only queen caps
+void genQueenCaps(){
+
+}
+
+//genKingCaps
+//Gen only king caps
+void genKingCaps(){
+
+}
+
+//Clean Movelist
+//When the king is in check in the current position
+//only search moves the get king out of check.
+
+void cleanList( std::vector mL ){
+
 }
