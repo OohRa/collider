@@ -143,6 +143,7 @@ void makeMove(){
 	//Promotion
 	if( pFlag ){
 		pce[piece].type = QUEEN;
+		pce[piece].value = QVAL;
 		//std::cout << "Promoting piece is: " << piece << "\n";
 		//std::cout << "It's type is: " << pce[piece].type << "\n";
 		board.enPas = 117;
@@ -281,6 +282,7 @@ void changeSide(){
 void moveGen(std::vector<int>& moveList, bool caps){
 	int piece;
 
+	moveList.clear();
 	genPawn();
 	genKnight();
 	genBishop();
@@ -307,8 +309,8 @@ void moveGen(std::vector<int>& moveList, bool caps){
 			continue;
 		}
 		for( int j = 0; j < pce[piece].caps.size(); j++ ){
-			if( pce[piece].mL[j] % 100 < 21 || pce[piece].mL[j] % 100 > 98 ){
-				std::cout << "Move Gen toSq Error: " << pce[piece].mL[j] << "\n";
+			if( pce[piece].caps[j] % 100 < 21 || pce[piece].caps[j] % 100 > 98 ){
+				std::cout << "Move Gen toSq Error: " << pce[piece].caps[j] << "\n";
 				std::cout << "Piece is: " << piece << "\n";
 				debugAll();
 				SDL_Delay(10000);
@@ -323,14 +325,33 @@ void moveGen(std::vector<int>& moveList, bool caps){
 		}
 		piece++;
 	}	
+	
+	//Test output movelist
+	//std::cout << "Movelist before sorting.\n";
+/*
+	for( int i = 0; i < moveList.size(); ++i ){
+		std::cout << moveList[i] << " ";
+	}
+	std::cout << "\n";
+*/
 
 	//Sort captures
 	sortCaps( moveList );
+
+	//Test output movelist
+	//std::cout << "Movelist after sorting.\n";
+/*
+	for( int i = 0; i < moveList.size(); ++i ){
+		std::cout << moveList[i] << " ";
+	}
+	std::cout << "\n";
+*/
+
+	//std::cout << "There are: " << moveList.size() << " captures.\n";
 	
 	if( !caps ){
 		//Fill board movelist with pieces movelists
 		piece = (board.side == WHITE) ? wqR: bqR;
-		moveList.clear();
 		for( int i = 0; i < 16; i++ ){
 			if( piece == 5 ){
 				//std::cout << "Adding white kings moves!\n";
@@ -411,12 +432,17 @@ void genPawn(){
 			
 			if( (board.enPas == toSq) && (((board.side ==  WHITE && board.enPas / 10 == 7)) || ((board.side == BLACK && board.enPas / 10 == 4)))){
 				pce[pawn].caps.push_back(( pSq * 100 ) + toSq );
+
+				//Test
+				//std::cout << "Adding pawn capture.\n";
 				continue;
 			}
 
 			if( getColor(toSq) == EMPTY || getColor(toSq) == OFFBOARD )
 				continue;
 			else if( getColor(toSq) != board.side ){
+				//Test 
+				//std::cout << "Adding pawn capture.\n";
 				pce[pawn].caps.push_back(( pSq * 100 ) + toSq );
 				continue;
 			}
@@ -561,9 +587,10 @@ void genQueen(){
 	for( int i = 0; i < 9; i++ ){
 		//if (queen == wK || queen == bK)
 			//std::cout << "WHAT THE FUCK i: " << i << '\n';
-		if( pce[queen].type == QUEEN ) 
+		if( pce[queen].type == QUEEN ){
 			pce[queen].mL.clear();
 			pce[queen].caps.clear();
+		}
 		qSq = pce[queen].pos;
 		if( pce[queen].life == false || pce[queen].type != QUEEN ){ 
 			if( queen != wQ && queen != bQ )
@@ -707,7 +734,7 @@ void sortCaps( std::vector<int> & sortCaps ){
 	do{
 		count = 0;
 		for( int i = 0; i < sortCaps.size() - 1; i++ ){
-			if( score[i + 1] > score[i] ){
+			if( score[i + 1] < score[i] ){
 				store = score[i];
 				score[i] = score[i + 1];
 				score[i + 1] = store;
@@ -726,110 +753,10 @@ void sortML( std::vector<int> & sortmL ){
 	//Placeholder until I come up with an efficient algorithm
 }
 
-void genCaps( std::vector mL ){
-	genPawnCaps();
-	genKnightCaps();
-	genBishopCaps();
-	genRookCaps();
-	genQueenCaps();
-	genKingCaps();
-}
-
-//genPawnCaps
-//Clears movelist then generates only captures
-void genPawnCaps(){
-	int pawn = (board.side == WHITE) ? wPa: bPa;
-	int toSq, pSq;
-	int slide[2];
-	if( board.side == WHITE ){
-		slide[0] = 9;
-		slide[1] = 11;
-	}
-	else{
-		slide[0] = -9;
-		slide[1] = -11;
-	}
-
-	for( int i = 0;  i < 8; i++ ){
-		pce[pawn].mL.clear();
-		if( pce[pawn].life == false ){
-			pawn++;
-			continue;
-		}
-		pSq = pce[pawn].pos;
-		for( int j = 0; j < 2; j++ ){
-			toSq = pSq + slide[j];
-			if( (board.side == WHITE && getColor(toSq) == BLACK) || (board.side == BLACK && getColor(toSq) == WHITE))
-				pce[pawn].mL.push_back((pSq * 100) + toSq);
-		}
-
-		pawn++;		
-	}	
-	
-
-}
-
-//genKnightCaps
-//Generates only knight captures
-void genKnightCaps(){
-	int knight = (pow(board.side,4) + board.side);
-	int nSq;
-	int change = 5;
-	int jump[8] = { -21, -19, -12, -8, 8, 12, 19, 21 };
-
-	//Fill with possible squares	
-	for( int i = 0; i < 2; i++ ){
-		pce[knight].mL.clear();
-		if( pce[knight].life == false ){
-			knight += change;
-			continue;
-		}
-		if( pce[knight].type == NOTYPE )
-			std::cout << "MOVEGENBUGKNIGHTS!\n";
-		nSq = pce[knight].pos;
-		for( int j = 0; j < 8; j++ ){
-			int checkSq = nSq + jump[j];
-			if( getColor(checkSq) != board.side && board.sq[checkSq] != OFFBOARD && checkSq != 0 )
-				pce[knight].mL.push_back((nSq * 100) + checkSq);
-		}
-		if(!i)
-			knight += change;
-	}
-
-	knight -= change;
-
-	return;
-
-}
-
-//genBishopCaps
-//Generates only bishop captures
-void genBishopCaps(){
-
-}
-
-//genRookCaps
-//Gen only rook caps
-void genRookCaps(){
-
-}
-
-//genQueenCaps
-//Gen only queen caps
-void genQueenCaps(){
-
-}
-
-//genKingCaps
-//Gen only king caps
-void genKingCaps(){
-
-}
-
 //Clean Movelist
 //When the king is in check in the current position
 //only search moves the get king out of check.
 
-void cleanList( std::vector mL ){
+void cleanList( std::vector<int>& mL ){
 
 }
