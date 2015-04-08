@@ -262,6 +262,8 @@ void unmakeMove(){
 	//Promotion
 	if( pFlag ){
 		pce[piece].type = PAWN;
+		pce[piece].value = PVAL;
+		//std::cout << "Unpromoting.\n";
 		//std::cout << "No cover for promotions yet!\n";
 	}
 	
@@ -279,8 +281,9 @@ void changeSide(){
 	return;
 }
 
-void moveGen(std::vector<int>& moveList, bool caps){
+void moveGen(std::vector<int>& moveList, bool caps, bool checks ){
 	int piece;
+	//std::cout << "Move genning!\n";
 
 	moveList.clear();
 	genPawn();
@@ -290,7 +293,7 @@ void moveGen(std::vector<int>& moveList, bool caps){
 	genKing();
 
 	//Don't call genCastle if king is off initial square
-	if( (board.side == WHITE && pce[wK].pos == 25) || (board.side == BLACK && pce[bK].pos == 95) )
+	if( ((board.side == WHITE && pce[wK].pos == 25) || (board.side == BLACK && pce[bK].pos == 95)) && !checks )
 		genCastle();
 	genQueen( );
 
@@ -337,6 +340,7 @@ void moveGen(std::vector<int>& moveList, bool caps){
 
 	//Sort captures
 	sortCaps( moveList );
+	int sizeCaps = moveList.size();
 
 	//Test output movelist
 	//std::cout << "Movelist after sorting.\n";
@@ -381,12 +385,13 @@ void moveGen(std::vector<int>& moveList, bool caps){
 			}
 			piece++;
 		}	
+		sortML(moveList, sizeCaps);	
+
+	
 	}	
 	//if( board.side == WHITE )
 		//debugAll();
 
-	//Disable sorting until bugs are fixed
-	//sortML(moveList);	
 }
 
 void genPawn(){	
@@ -749,8 +754,77 @@ void sortCaps( std::vector<int> & sortCaps ){
 
 }
 
-void sortML( std::vector<int> & sortmL ){
+void sortML( std::vector<int> & sortmL, int size ){
 	//Placeholder until I come up with an efficient algorithm
+	std::vector<int> sort(size, 0);
+	
+	int sq = 0, to = 0, piece = 0, type = 0, score = 0;
+	//std::cout << "In sortML!\n";
+	
+	//Score all moves
+	for(int i = size; i < sortmL.size(); ++i){
+		score = 0;
+		sq = indexA.sq[(sortmL[i]/100)];
+		to = indexA.sq[(sortmL[i] % 100)];
+		piece = getPiece(sortmL[i]/100);
+		type = pce[piece].type; 
+		if( board.side == BLACK ){
+			sq = flip[sq];
+			to = flip[to];
+		}
+		if( type == PAWN ){
+			score = pawnTable[to] - pawnTable[sq];
+/*
+			std::cout << "to val: " << pawnTable[to] << "\n";
+			std::cout << "fr val: " << pawnTable[sq] << "\n";
+			std::cout << "sq is: " << sq << " to is: " << to << "\n";
+			std::cout << "side is: " << board.side << "\n";
+			std::cout << "sort move is: " << sortmL[i] << "\n";
+*/
+		}
+		else if( type == KNIGHT )
+			score = knightTable[to] - knightTable[sq];
+	
+		else if( type == BISHOP ){
+			score = bishopTable[to] - bishopTable[sq];
+		}
+		else if( type == ROOK ){
+			score = rookTable[to] - rookTable[sq];
+		}
+		else if( type == QUEEN ){
+			score = queenTable[to] - queenTable[sq];
+		}
+		
+		else if( type == KING ) {
+			if( ply < 40 )
+				score = kingTable1[to] - kingTable1[sq];
+			else 
+				score = kingTable2[to] - kingTable2[sq];
+		}
+		sort.push_back(score);
+	}
+
+	if( sort.size() == 0 ) 
+		return;
+	//Sort them
+	//std::cout << "Sorting!\n";
+	int count, store;
+	do{
+		count = 0;
+		for( int i = size; i < sortmL.size() - 1; i++ ){
+			if( sort[i + 1] > sort[i] ){
+				store = sort[i];
+				sort[i] = sort[i + 1];
+				sort[i + 1] = store;
+				store = sortmL[i];
+				sortmL[i] = sortmL[i + 1];
+				sortmL[i + 1] = store;
+				count++; 
+			}
+		} 
+	}while( count > 0 );
+	//std::cout << "Done sorting!\n";
+
 }
 
 //Clean Movelist
