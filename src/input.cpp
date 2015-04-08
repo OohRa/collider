@@ -9,11 +9,13 @@
 #include "board.h"
 #include <unistd.h>
 #include "debug.h"
+#include "search.h"
 
 //FUE
 /* Takes input from the user and checks it for input error */
 bool userEntry(){	
 	std::string input;
+	thinkFlag = false;
 
 	//Display side to move
 	if( board.side == WHITE ){
@@ -48,6 +50,12 @@ bool userEntry(){
 	//Flip board command
 	if( input == "flip" ){
 		flipFlag = (flipFlag) ? false: true;
+		return false;
+	}
+
+	if( input == "think" || input == "t" ){
+		thinkFlag = true;
+		engine();
 		return false;
 	}
 
@@ -124,6 +132,7 @@ void userInput(){
 	if( stop ) return;
 	while( !checkLegal() || moveCheck() ){
 		displayAll();
+		std::cout << "TEST 4\n";
 		getInput();
 		if( stop ) return;
 	}	
