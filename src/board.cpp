@@ -3,84 +3,71 @@
 #include "primer.h"
 #include "board.h"
 
-//Takes a square and returns the piece value
-int getPiece( int sq ){
-	return board.sq[sq];
-}	
+void dispMove( int move ){
+	int piece = board.sq[move / 100];
+	int sq = move % 100;
+	char letter = '\0';
+	char file = '\0';
+	int rank = (sq / 10 - 1);
 
-//Take a square and returns the color of the piece on that square
-int getColor( int sq ){
-	int sqVal;
-	sqVal = getPiece( sq );
-
-	//Check for color
-	if( sqVal >= wqR && sqVal <= wPh )      //White piece
-		 return WHITE;
-	else if( sqVal >= bqR && sqVal <= bPh ) //Black Pieces
-		 return BLACK;
-	else if( sqVal == EMPTY ) 		//Empty squares
-		return NONE;
-	else return OFFBOARD;			//General else
-}
-
-//Takes a square and returns type of piece on that square
-int getType ( int sq ){
-	int type, piece;
-	piece = getPiece( sq );
-
-	//Check what type the piece is.
-	switch ( piece ){		//Switch from display function
-		case wqR:
+	//Display piece Letter
+	//std::cout << "Move is: " << move << "\n";
+	//std::cout << "piece is: " << piece << "\n";
+	switch(piece){
+		case wqR: 
 		case wkR:
 		case bqR:
-		case bkR: type = ROOK; break;
+		case bkR: letter = 'R'; break;
 		case wqN:
 		case wkN:
 		case bqN:
-		case bkN: type = KNIGHT; break;
+		case bkN: letter = 'N'; break;
 		case wqB:
 		case wkB:
 		case bqB:
-		case bkB: type = BISHOP; break;
-		case  wQ: 
-		case  bQ: type = QUEEN; break;
-		case  wK:
-		case  bK: type = KING; break;
-		default:  type = PAWN; break;
+		case bkB: letter = 'B'; break;
+		case wQ:
+		case bQ: letter = 'Q'; break;
+		case wK:
+		case bK: letter = 'K'; break;
+		default: letter = 'P';
 	}
-	
-	/* Check afterwards for empty and offboard squares
-	   to use default option in switch for pawns */
-	if( piece == EMPTY )
-		 type = NOTYPE;
-	
-	if( piece == -1 )
-		 type = OFFBOARD;
+  
+	switch(sq % 10){
+		case 1: file = 'a'; break;
+		case 2: file = 'b'; break;
+		case 3: file = 'c'; break;
+		case 4: file = 'd'; break;
+		case 5: file = 'e'; break;
+		case 6: file = 'f'; break;
+		case 7: file = 'g'; break;
+		case 8: file = 'h'; break;
+	}
 
-	return type;
+	std::cout << letter << file << rank;
 }
 
-int getValue( int sq ){
-	int val;
+void dispSq( int sq ){
+	char file = '\0';
 
-	switch(getType(sq)){
-		case PAWN: val = PVAL; break;
-		case KNIGHT: val = NVAL; break;
-		case BISHOP: val = BVAL; break;
-		case ROOK: val = RVAL; break;
-		case QUEEN: val = QVAL; break;
-		case KING: val = KVAL; break;
-		default: val = NOVAL; 
+	switch(sq % 10){
+		case 1: file = 'a'; break;
+		case 2: file = 'b'; break;
+		case 3: file = 'c'; break;
+		case 4: file = 'd'; break;
+		case 5: file = 'e'; break;
+		case 6: file = 'f'; break;
+		case 7: file = 'g'; break;
+		case 8: file = 'h'; break;
 	}
-	
-	return val;
+
+	std::cout << file << (sq / 10) - 1;
+
 }
 
-void setMove( std::vector<int>& moveList, int index ){
-	board.frSq = moveList[index]/100;
-	board.toSq = moveList[index]%100;
-	if( board.frSq < 20 || board.frSq > 98 )
-		std::cout << "frSq Error in setMove!: " << board.frSq << "\n";
-	if( board.toSq < 20 || board.toSq > 98 )
-		std::cout << "toSq Error in setMove!: " << board.toSq << "\n";
+int getOpp(){
+	if( board.side == WHITE )
+		return BLACK;
+	else
+		return WHITE;
 }
