@@ -47,6 +47,14 @@ bool userEntry(){
 		return false;
 	}
 
+	//Increase and decrease depth
+	if( input == "id" ){
+		grandDepth++;
+	}
+	else if( input == "dd" ){
+		grandDepth--;
+	}
+
 	//Flip board command
 	if( input == "flip" ){
 		flipFlag = (flipFlag) ? false: true;
@@ -128,7 +136,6 @@ bool userEntry(){
    Basically takes input, checks it, and sets the official to and fr squares */
 void userInput(){
 	getInput();
-	std::cout << "Test 3\n";
 	if( stop ) return;
 	while( !checkLegal() || moveCheck() ){
 		displayAll();
