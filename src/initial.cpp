@@ -18,7 +18,9 @@ bool stop;
 bool flipFlag = false;
 bool slowFlag = false;
 bool genFlag = false;
+bool thinkFlag = false;
 int ply = 0;
+int grandDepth = 1;
 
 //FII
 /* Initialize index board */
@@ -54,6 +56,8 @@ void initialIndexes(){
 void initialBoard(){
 	int file, rank, square64, square120, piece, index, count;
 	board.side = WHITE;
+	board.castled[WHITE] = false;
+	board.castled[BLACK] = false;
 
 	//Initialize starting board sets to -1
 	for( index = 0; index < 64; index++){	//Will end up deleting board64
@@ -113,6 +117,8 @@ void initialBoard(){
 			life++;
 		}
 	}
+
+	undo.reserve(40);
 }
 
 /* Initialize piecelist from board */
@@ -142,6 +148,12 @@ void initialPieces(){
 			}
 		}
 	}
+
+	//Material Count
+        for( int i = wqR; i <= bPh; ++i ){
+		board.material[getColor(pce[i].pos)] += pce[i].value;
+        }
+	
 }
 
 /* Initialize Bitboards
@@ -151,78 +163,50 @@ void initialBitboards(){
 	//Initialize all bitboards
 	//(figure out attacking bitboards and put in pieceStruct)
 	//Clear bitsets by setting to 0 then filling with data from piecelist
-	bb.whiteRooks = 0;
-	bb.whiteRooks = ( pce[wqR].bitboard | pce[wkR].bitboard );
+	bb.rooks[WHITE] = 0;
+	bb.rooks[WHITE] = ( pce[wqR].bitboard | pce[wkR].bitboard );
 
-	bb.whiteKnights = 0;
-	bb.whiteKnights = ( pce[wqN].bitboard | pce[wkN].bitboard );
+	bb.pawns[WHITE] = 0;
+	bb.pawns[WHITE] =	pce[wPa].bitboard    |
+				pce[wPb].bitboard    |
+				pce[wPc].bitboard    |
+				pce[wPd].bitboard    |
+				pce[wPe].bitboard    |
+				pce[wPf].bitboard    |
+				pce[wPg].bitboard    |
+				pce[wPh].bitboard;
 
-	bb.whiteBishops = 0;
-	bb.whiteBishops = ( pce[wqB].bitboard | pce[wkB].bitboard );
-	
-	bb.whiteQueen = 0;
-	bb.whiteQueen = ( pce[wQ].bitboard );
-	
-	bb.whiteKing = 0;
-	bb.whiteKing = ( pce[wK].bitboard );
-	
-	bb.whitePawns = 0;
-	bb.whitePawns =	pce[wPa].bitboard    |
-			pce[wPb].bitboard    |
-			pce[wPc].bitboard    |
-			pce[wPd].bitboard    |
-			pce[wPe].bitboard    |
-			pce[wPf].bitboard    |
-			pce[wPg].bitboard    |
-			pce[wPh].bitboard;
-
-	bb.whitePieces = 
-			bb.whiteRooks   |
-			bb.whiteKnights |
-			bb.whiteBishops |
-			bb.whiteQueen   | 	
-			bb.whiteKing    |
-			bb.whitePawns;  
+	bb.pieces[WHITE] = 
+			bb.rooks[WHITE]   |
+			bb.pawns[WHITE];
+	for( int i = wqN; i <= wkN; ++i ){
+		bb.pieces[WHITE] |= pce[i].bitboard;
+	}  
 	 
-	bb.blackRooks = 0;
-	bb.blackRooks = ( pce[bqR].bitboard | pce[bkR].bitboard );
+	bb.rooks[BLACK] = 0;
+	bb.rooks[BLACK] = ( pce[bqR].bitboard | pce[bkR].bitboard );
 
-	bb.blackKnights = 0;
-	bb.blackKnights = ( pce[bqN].bitboard | pce[bkN].bitboard );
+	bb.pawns[BLACK] = 0;
+	bb.pawns[BLACK] =	pce[bPa].bitboard    |
+				pce[bPb].bitboard    |
+				pce[bPc].bitboard    |
+				pce[bPd].bitboard    |
+				pce[bPe].bitboard    |
+				pce[bPf].bitboard    |
+				pce[bPg].bitboard    |
+				pce[bPh].bitboard;
 
-	bb.blackBishops = 0;
-	bb.blackBishops = ( pce[bqB].bitboard | pce[bkB].bitboard );
-	
-	bb.blackQueen = 0;
-	bb.blackQueen = ( pce[bQ].bitboard );
-	
-	bb.blackKing = 0;
-	bb.blackKing = ( pce[bK].bitboard );
-	
-	bb.blackPawns = 0;
-	bb.blackPawns =	pce[bPa].bitboard    |
-			pce[bPb].bitboard    |
-			pce[bPc].bitboard    |
-			pce[bPd].bitboard    |
-			pce[bPe].bitboard    |
-			pce[bPf].bitboard    |
-			pce[bPg].bitboard    |
-			pce[bPh].bitboard;
-
-	bb.blackPieces =
-		 	bb.blackRooks   |
-			bb.blackKnights |
-			bb.blackBishops |
-			bb.blackQueen   | 	
-			bb.blackKing    |
-			bb.blackPawns;  
+	bb.pieces[BLACK] = 
+			bb.rooks[BLACK]   |
+			bb.pawns[BLACK];
+	for( int i = bqN; i <= bkN; ++i ){
+		bb.pieces[BLACK] = bb.pieces[BLACK] | pce[i].bitboard;
+	}  
 	 
-	bb.occupiedSquares = bb.blackPieces | bb.whitePieces;
+	bb.occupiedSquares = bb.pieces[WHITE] | bb.pieces[BLACK];
 	bb.emptySquares = ~bb.occupiedSquares;
 	life++;
 	
-	bb.oppPawn = 0;
-	bb.ownPieces = 0;	
 	bb.file[FILE_H] = 0x8080808080808080;
 	bb.file[FILE_G] = 0x4040404040404040;
 	bb.file[FILE_F] = 0x2020202020202020;
@@ -240,6 +224,65 @@ void initialBitboards(){
 	bb.rank[RANK_6] = 0xFF0000000000;
 	bb.rank[RANK_7] = 0xFF000000000000;
 	bb.rank[RANK_8] = 0xFF00000000000000;
+	
+	//Passed pawn bitboard
+	int signs[3] = {0,1,-1};
+	int piece = 0;
+	int slide[3] = {9,10,11};
+	int m = 0, n = 0;
+	int limit = 0;
+	int sq = 0;
+	U64 bitmask = 0;
+
+	for( int c = WHITE; c <= BLACK; ++c ){
+	        limit = (c == WHITE) ? 10: 1;	
+		piece = (c == WHITE) ? wPa: bPh;		
+		for( int s = indexA.sq[pce[piece].pos]; s != indexA.sq[pce[piece].pos] + signs[c] * 40; s += signs[c] ){
+			std::cout << "sq is " << s << "\n";
+			//Limits on a and h file pawns
+			if( (indexA.sq64[s] % 10) == 1 ){
+				if( c == BLACK ){
+					m = 0;
+					n = 2;
+				}
+				else{
+					m = 1;	
+					n = 3;
+				}
+			}
+			else if( (indexA.sq64[s] % 10) == 8 ){
+				if( c == BLACK ){
+					m = 1;
+					n = 3;
+				}
+				else{
+					m = 0;
+					n = 2;
+				}
+			}
+			else{
+				m = 0;
+				n = 3;
+			} 
+			//Loops for squares
+			sq = indexA.sq64[s] - 31;
+			bb.passPwn[c][sq] = 0;
+			for( int i = m; i < n; ++i ){
+				for( int j = indexA.sq64[s] + signs[c] * slide[i]; (j / 10) != limit; j += signs[c] * 10 ){
+					bitmask = 0;
+					bitmask++;
+					bitmask <<= indexA.sq[j];
+					bb.passPwn[c][sq] |= bitmask;		
+					//std::cout << "Current sq board is " << indexA.sq64[s] << "\n";
+					//std::cout << "Fill sq is " << j << "\n";
+					//std::cout << "limit is " << limit << "\n";
+				} 
+			}
+				
+		}
+	}
+
+
 }
 
 /* Initialize movelists */
