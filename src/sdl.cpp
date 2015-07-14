@@ -50,7 +50,7 @@ bool initSDL(){
 	}
 	else{
 		//Create Window
-		gWindow = SDL_CreateWindow( "Collider 0.5", 1200, 0, SCREEN_WIDTH, SCREEN_HEIGHT, !SDL_WINDOW_INPUT_FOCUS );
+		gWindow = SDL_CreateWindow( "Collider 0.75", 1200, 0, SCREEN_WIDTH, SCREEN_HEIGHT, !SDL_WINDOW_INPUT_FOCUS );
 		if( gWindow == NULL ){
 			printf( "Window could not be created! SDL_Error: %s\n", SDL_GetError() );
 			success = false;

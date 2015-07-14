@@ -349,7 +349,7 @@ bool checkCheck(){
 					}
 					else break;
 				}
-				if( toType == PAWN ){	
+				else if( toType == PAWN ){	
 					if( (abs(indexSq - kingSq) == 9 || abs(indexSq - kingSq) == 11) && toType == PAWN ){
 						if( board.side == WHITE ){
 							if( (indexSq - kingSq) > 0 ){
@@ -364,14 +364,25 @@ bool checkCheck(){
 					}
 					else break;
 				}
-				if( toType == BISHOP || toType == QUEEN ){
+				else if( toType == BISHOP ){
 					if( abs(slide) % 9 == 0 || abs(slide) % 11 == 0 ){
 						return true;
 					}
 					else break;
 				}
-				if( toType == ROOK || toType == QUEEN ){
-					if( abs(slide) % 10 == 0 || slide == RT || slide == LEFT ){
+				else if( toType == ROOK ){
+					if( (abs(slide) % 10 == 0) || (slide == RT || slide == LEFT) ){
+						return true;
+					}
+					else break;
+				}
+				else if( toType == KNIGHT )
+					break;
+				else if( toType == QUEEN ){
+					if( abs(slide) % 9 == 0 || abs(slide) % 11 == 0 ){
+						return true;
+					}
+					else if( (abs(slide) % 10 == 0) || (slide == RT || slide == LEFT) ){
 						return true;
 					}
 					else break;

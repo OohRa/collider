@@ -188,11 +188,11 @@ int displayGraphics(){
 		}
 		
 		//For promoted pawns
-		if((( showPiece >= wPa && showPiece <= wPh ) || ( showPiece >= bPa && showPiece <= bPh )) && pce[showPiece].type == QUEEN ){
-			if( pce[showPiece].color == WHITE )
-				showPiece = wQ;
-			else if( pce[showPiece].color == BLACK )	
-				showPiece = bQ;
+		if(( showPiece == gWP || ( showPiece == gBP )) && pce[piece].type == QUEEN ){
+			if( pce[piece].color == WHITE )
+				showPiece = gWQ;
+			else if( pce[piece].color == BLACK )	
+				showPiece = gBQ;
 			else 
 				std::cout << "AGH HELP!";
 		}
