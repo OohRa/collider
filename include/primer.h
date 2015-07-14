@@ -9,14 +9,24 @@
 
 
 //CONSTANTS
-extern int life;
+extern double life;
 
 //Globals
 extern bool undoFlag;
 extern bool flipFlag;
 extern bool slowFlag;
 extern bool genFlag;
+extern bool thinkFlag;
 extern int ply;
+extern int grandDepth;
+extern int flip[64];
+extern int pawnTable[64];
+extern int knightTable[64];
+extern int bishopTable[64];
+extern int rookTable[64];
+extern int queenTable[64];
+extern int kingTable1[64];
+extern int kingTable2[64];
 
 //DEFINITIONS
 
@@ -41,8 +51,8 @@ enum {  EMPTY,
 	bqR, bqN, bqB,  bQ,  bK, bkB, bkN, bkR,
 	bPa, bPb, bPc, bPd, bPe, bPf, bPg, bPh  }; 
 	
-enum { NOVAL = 0, PVAL = 100, NVAL = 400, BVAL = 380, RVAL = 600,
-       QVAL = 1250, KVAL = 9999 };
+enum { NOVAL = 0, PVAL = 100, NVAL = 300, BVAL = 350, RVAL = 500,
+       QVAL = 1000, KVAL = 99999 };
 
 /* Constants for File and Rank */
 
@@ -76,7 +86,9 @@ enum {
 	a8, b8, c8, d8, e8, f8, g8, h8 };
 	
 
+
 enum { FALSE, TRUE };
+
 
 //DECLARATIONS
 
@@ -94,6 +106,9 @@ struct boardStruct
 	int sq64[64];
 
 	bool castling;
+	bool castled[3];
+	int material[3];
+
 	int enPas;
 	std::vector<int> mL;
 	std::vector<int> score;
@@ -110,35 +125,30 @@ struct pieceStruct
 	U64 bitboard;
 	int moved;
 	std::vector<int> mL;
+	std::vector<int> caps;
 };
 
 struct bitboardStruct 
 {
 
-	U64 whiteRooks;
+	U64 rooks[3];
+	U64 pawns[3];
+	U64 pieces[3];
+	U64 occupiedSquares;
+	U64 emptySquares; 
+
+	U64 rank[8];
+	U64 file[8];
+	U64 diagW[8];
+	U64 diagB[8];
+	U64 passPwn[3][58];
+/* 
+	//Deactivated until reason to use
 	U64 whiteKnights;
 	U64 whiteBishops;
 	U64 whiteQueen;
 	U64 whiteKing;
-	U64 whitePawns;
-	U64 whitePieces;
-
-	U64 blackRooks;
-	U64 blackKnights;
-	U64 blackBishops;
-	U64 blackQueen;
-	U64 blackKing;
-	U64 blackPawns;
-	U64 blackPieces;
-
-	U64 occupiedSquares;
-	U64 emptySquares; 
-
-	U64 oppPawn;
-	U64 ownPieces;
-	U64 rank[8];
-	U64 file[8];
-
+*/
 };
 
 

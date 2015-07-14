@@ -4,6 +4,7 @@
 
 //Functions
 void bitboardDebug();
+void bbDisp( U64 bb );
 void boardDebug();
 void debugAll();
 void debugVal();
