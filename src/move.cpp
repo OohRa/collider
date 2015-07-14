@@ -1,4 +1,4 @@
- //move.cpp
+//move.cpp
 
 #include <iostream>
 #include "primer.h"
@@ -12,27 +12,8 @@
 
 //(VMM)
 void makeMove(){
-	//std::cout << "In makeMove()\n";
-	//TEST
-	if( board.sq[99] != -1 ){
-		std::cout << "Sq 99 is not offboard anymore. In make\n";
-		std::cout << "frSq: " << board.frSq << "\n";
-		std::cout << "toSq: " << board.toSq << "\n";
-		std::cout << "Piece: " << board.sq[board.frSq] << "\n";
-		debugAll();
-		SDL_Delay(10000);
-	}
-	//Test 2
-	if( board.toSq == 99 ){
-		std::cout << "Moving to square 99.\n";
-		std::cout << "frSq: " << board.frSq << "\n";
-		std::cout << "toSq: " << board.toSq << "\n";
-		std::cout << "Piece: " << board.sq[board.frSq] << "\n";
-		debugAll();
-		SDL_Delay(10000);
-	}
-	
 	ply++;
+
 	//Set all flags to false;
 	bool cFlag = false, eFlag = false, pFlag = false, sFlag = false;
 	
@@ -59,37 +40,26 @@ void makeMove(){
 	int piece = board.sq[board.frSq];
 	int value = board.sq[board.toSq];
 
-	//Test
-	if( getType(board.frSq) == NOTYPE ){
-		std::cout << "BUG BUG BUG\n";
-		std::cout << "Piece is: " << piece << "\n"
-			  << "Move is: " << board.frSq << board.toSq << "\n"
-			  << "Type is: " << getType(board.frSq) << "\n"
-			  << "Type from piecelist is: " << pce[piece].type << "\n";
-		//debugAll();
-	}	
+	//Update material
+	board.material[getOpp()] -= pce[value].value;
+
 	//Move piece
 	board.sq[board.frSq] = EMPTY;
 	board.sq[board.toSq] = piece;
 	
+	//Bitboard move
+	int indexSq = indexA.sq[board.toSq];
+	pce[piece].bitboard = 0;
+	pce[piece].bitboard++;
+	pce[piece].bitboard <<= indexSq;
+	pce[value].bitboard = 0;
+
 	//Update pieces
 	pce[piece].pos = board.toSq;
-	//if( piece == 0 )
-		//std::cout << "Moving an empty square!\n";
-	//std::cout << "Increasing move counter!\n";
 	pce[piece].moved++;
 	pce[value].pos = DEAD;
 	pce[value].life = false;
-
-	//TEST
-	if( board.sq[99] != -1 ){
-		std::cout << "Sq 99 is not offboard anymore. In make before castle.\n";
-		std::cout << "frSq: " << board.frSq << "\n";
-		std::cout << "toSq: " << board.toSq << "\n";
-		std::cout << "Piece: " << board.sq[board.frSq] << "\n";
-		debugAll();
-		SDL_Delay(10000);
-	}
+	
 	//Castling
 	if( cFlag ){
 		int rook = 0;
@@ -108,51 +78,44 @@ void makeMove(){
 			pce[rook].pos = board.toSq + 1;
 		}
 		pce[rook].moved++;
+		pce[rook].bitboard = 0;
+		pce[rook].bitboard++;
+		pce[rook].bitboard <<= indexA.sq[pce[rook].pos];
+		board.castled[board.side] = true;
 	}
-
-	//TEST
-	if( board.sq[99] != -1 ){
-		std::cout << "Sq 99 is not offboard anymore. In make after castle\n";
-		std::cout << "frSq: " << board.frSq << "\n";
-		std::cout << "toSq: " << board.toSq << "\n";
-		std::cout << "Piece: " << board.sq[board.frSq] << "\n";
-		debugAll();
-		SDL_Delay(10000);
-	}
+	
 	//En Passant
 	else if( eFlag ){
 		int pawn = 0;
-		//std::cout << "Taking enPassant piece!\n"; 
+
 		//White
 		if( diff > 0 ){
-			//std::cout << "Square being taken is: " << board.toSq - 10 << "\n";
 			pawn = board.sq[board.toSq - 10];
 			board.sq[board.toSq - 10] = EMPTY;
 		}
+
 		//Black
 		else if( diff < 0 ){
 			pawn = board.sq[board.toSq + 10];
-			//std::cout << "Black enPassant\n";
 			board.sq[board.toSq + 10] = EMPTY;	
 		}
 		pce[pawn].life = false;
 		pce[pawn].pos = DEAD;
-		//std::cout << "Pawns position is: " << pce[pawn].pos << "\n";
+		pce[pawn].bitboard = 0;
+		board.material[getOpp()] -= pce[pawn].value;
 	 }
-
+	
 	//Promotion
 	if( pFlag ){
 		pce[piece].type = QUEEN;
 		pce[piece].value = QVAL;
-		//std::cout << "Promoting piece is: " << piece << "\n";
-		//std::cout << "It's type is: " << pce[piece].type << "\n";
+		board.material[board.side] += (QVAL-PVAL);
 		board.enPas = 117;
 	}
 
 	//Set enPassant square
 	else if( sFlag ){
 		board.enPas = (board.side == WHITE) ? board.toSq - 10: board.toSq + 10;
-		//std::cout << "enPassant square is: " << board.enPas << "\n";
 	}
 	else 
 		board.enPas = 0; 
@@ -160,21 +123,11 @@ void makeMove(){
 	//Add to undo structure
 	undo.push_back({board.frSq * 100 + board.toSq, board.enPas, piece * 100 + value});
 
-	//TEST
-	if( board.sq[99] != -1 ){
-		std::cout << "Sq 99 is not offboard anymore. end of make\n";
-		std::cout << "frSq: " << board.frSq << "\n";
-		std::cout << "toSq: " << board.toSq << "\n";
-		std::cout << "Piece: " << board.sq[board.frSq] << "\n";
-		debugAll();
-		SDL_Delay(10000);
-	}
-
+	updateBB();
 }
 
 //(VUM)
 void unmakeMove(){
-	//std::cout << "In unmakeMove!\n";
 	ply--;	
 	bool cFlag = false, eFlag = false, pFlag = false;
 	int diff = 0, piece, value;
@@ -188,16 +141,6 @@ void unmakeMove(){
 	board.enPas = undo[undo.size() - 2].enPas;
 	promote = undo[undo.size() - 1].enPas;
 	
-	//std::cout << "Promote is: " << promote << "\n";
-	//std::cout << "Type of toSq is: " << getType(board.toSq) << "\n";
-	//Test
-	if( board.toSq > 98 || board.toSq < 21 ){
-		std::cout << "Move bound error in unmake!\n";
-		std::cout << "The move is: " << board.frSq << board.toSq << "\n";
-		debugAll();
-		SDL_Delay(10000);
-	}
-
 	diff = board.toSq - board.frSq;
 	
 	//Set flags
@@ -213,15 +156,23 @@ void unmakeMove(){
 		pFlag = true; 
 	}
 
+	//Material Count
+	board.material[getOpp()] += pce[value].value;
+
 	//Unmake move
 	board.sq[board.frSq] = piece;
 	board.sq[board.toSq] = value;
-	//std::cout << "Decreasing move counter!\n";
 	pce[piece].moved--;
 	pce[piece].pos = board.frSq;
 	if( value != EMPTY )
 		pce[value].life = true;
 	pce[value].pos = board.toSq;
+	pce[piece].bitboard = 0;
+	pce[value].bitboard = 0;
+	pce[piece].bitboard++;
+	pce[piece].bitboard <<= indexA.sq[pce[piece].pos];
+	pce[value].bitboard++;
+	pce[value].bitboard <<= indexA.sq[pce[value].pos];
 
 	//Castling
 	if( cFlag ){
@@ -240,6 +191,10 @@ void unmakeMove(){
 			pce[rook].pos = board.toSq - 2;
 		}
 		pce[rook].moved--;
+		pce[rook].bitboard = 0;
+		pce[rook].bitboard++;
+		pce[rook].bitboard <<= indexA.sq[pce[rook].pos];
+		board.castled[board.side] = false;
 	}
 
 	//enPassant
@@ -257,35 +212,31 @@ void unmakeMove(){
 			pce[pawn].pos = board.toSq + 10;
 		}
 		pce[pawn].life = true;
+		pce[pawn].bitboard = 0;
+		pce[pawn].bitboard++;
+		pce[pawn].bitboard <<= indexA.sq[pce[pawn].pos];
+		board.material[getOpp()] += pce[pawn].value;
 	}
 
 	//Promotion
 	if( pFlag ){
 		pce[piece].type = PAWN;
 		pce[piece].value = PVAL;
+		board.material[board.side] -= (QVAL-PVAL);
 		//std::cout << "Unpromoting.\n";
-		//std::cout << "No cover for promotions yet!\n";
 	}
 	
-	//Test
-	if( board.sq[99] != OFFBOARD ){
-		std::cout << "Sq 99 isn't offboard, in unmake!\n";
-		debugAll();
-		SDL_Delay(10000);
-	}
 	undo.pop_back();
+	updateBB();
 }
 
-void changeSide(){	
-	(board.side == WHITE) ? board.side = BLACK : board.side = WHITE;
-	return;
-}
 
 void moveGen(std::vector<int>& moveList, bool caps, bool checks ){
 	int piece;
 	//std::cout << "Move genning!\n";
 
 	moveList.clear();
+	moveList.reserve(40);
 	genPawn();
 	genKnight();
 	genBishop();
@@ -832,5 +783,45 @@ void sortML( std::vector<int> & sortmL, int size ){
 //only search moves the get king out of check.
 
 void cleanList( std::vector<int>& mL ){
+	//Loop through movelist and remove moves that don't escape check
+	for( int i = 0; i < mL.size(); ++i ){
+		setMove(mL, i);
+		makeMove();
+		if( checkCheck() )
+			mL[i] = 0;		
+	}
 
+	int i = 0, count = 1;
+	while( count != 0 ){
+		if( mL[i] == 0 )
+			++i;
+	}
 }
+
+//Update bb
+void updateBB(){
+	int piece = 0;
+	//Update Pieces
+	for( int c = WHITE; c <= BLACK; ++c ){
+		bb.pawns[c] = 0;
+		piece = ( c == WHITE ) ? wPa: bPa;
+		for( int i = piece; i <= piece + 7; ++i ){
+			bb.pawns[c] |= pce[i].bitboard;
+		}
+
+		piece = ( c == WHITE ) ? wqR: bqR;
+		bb.rooks[c] = 0;
+		bb.rooks[c] |= pce[piece].bitboard | pce[piece + 7].bitboard;  
+		bb.pieces[c] = 0;
+		bb.pieces[c] |= bb.pawns[c] | bb.rooks[c];
+		piece = (c == WHITE ) ? wqN : bqN;
+		for( int i = piece; i <= piece + 5; ++i ){
+			bb.pieces[c] |= pce[i].bitboard;
+		}
+		bb.occupiedSquares |= bb.pieces[c];
+	}
+	bb.emptySquares = ~bb.occupiedSquares;
+	
+	
+
+} 
