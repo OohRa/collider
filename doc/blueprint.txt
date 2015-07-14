@@ -68,3 +68,54 @@
 2.) Search
 3.) Evaluation
 4.) UCI Protocol
+
+
+************************************************************
+STATS
+************************************************************
+First Test. No optimization 04/08/2015 1:34pm
+	(Tested on first move for baseline)
+	113knps   ply 8
+	182.6knps ply 7
+	113.2knps ply 6
+	
+	Even numbered ply's seem slower than their odd counterparts
+
+	Further testing will be at ply 7
+	182.44knps
+	181.63knps
+	183.30knps
+	181.49knps
+	181.32knps
+
+Second Test.  Made board.cpp functions inline.
+	These included, getType, getColor etc. and setMove.
+
+	177.06knps
+	181.30knps
+	181.95knps
+
+************************************************************
+July 06, 2015
+
++ Permanent castle flag instead of king being next to rook
+  Complete separate endgame square tables
+	As of now, pawns and king have separate tables.
++ Keyboard control for increasing and decreasing depth 
+  Computer control to increase depth, more in endgame less in middle
+  	Time based, etc... (have entire search limited to 10 sec)
+  Find checkmates based on no squares available for king
+  Will always take a repetition draw. Fix for only take if losing
+  Don't exchange when down, exchange when up. (This seems like it
+  	works well already)
++ Add passed pawns eval
++ Isolated pawns eval
+  Outpost eval
+ 
+************************************************************ 
+July 07, 2015
+
+  Add opening books
+  Mobility eval
+  Switch material count from loop in eval to incrementally updated in move.cpp
+  Changing passed pawns eval to bitboard based
