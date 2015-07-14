@@ -25,45 +25,52 @@ void boardDebug(){
 
 void bitboardDebug(){
 	/* Displays bitboards for debugging */
+	//Pieces
+	for( int c = WHITE; c <= BLACK; ++c ){
+		int piece = (c == WHITE) ? wqR: bqR;
+		if( c == WHITE )
+			std::cout << "White ";
+		else
+			std::cout << "Black ";
+		std::cout << "Pieces\n";
+		
+		//General piece bb loop
+		for( int i = piece; i <= piece + 15; ++i ){
+			std::cout << (std::bitset<64>) pce[i].bitboard << std::endl;
+		}
+		
+		//Pawns
+		std::cout << "Pawns\n";
+		bbDisp( bb.pawns[c]);
+		std::cout << (std::bitset<64>) bb.pawns[c] << std::endl;
+		//Rooks
+		std::cout << "Rooks\n";
+		std::cout << (std::bitset<64>) bb.rooks[c] << std::endl;
+		//Pieces
+		std::cout << "Pieces\n";
+		std::cout << (std::bitset<64>) bb.pieces[c] << std::endl;
+		
+	}
+
+	//All pieces
+	std::cout << "Occupied Squares\n";
+	std::cout << (std::bitset<64>) bb.occupiedSquares << std::endl;
+	std::cout << "Empty Squares\n";
+	std::cout << (std::bitset<64>) bb.emptySquares << std::endl;
 /*
-	cout << "\"White Rooks\"" << endl;
-	cout << (bitset<64>) whiteRooks << endl;
-	cout << "\"White Knights\"" << endl;
-	cout << (bitset<64>) whiteKnights << endl;
-	cout << "\"White Bishops\"" << endl;
-	cout << (bitset<64>) whiteBishops << endl;
-	cout << "\"White Queen\"" << endl;
-	cout << (bitset<64>) whiteQueen << endl;
-	cout << "\"White King\"" << endl;
-	cout << (bitset<64>) whiteKing << endl;
-	cout << "\"White Pawns\"" << endl;
-	cout << (bitset<64>) whitePawns << endl;
-	cout << "\"White Pieces\"" << endl;
-	cout << (bitset<64>) whitePieces << endl;
-	nl(1);
+	//Passed Pawn bitboards
+	std::cout << "Passed Pawn Boards\n";
+	for(int i = WHITE; i <= BLACK; ++i ){
+		for(int j = 0; j < 58; ++j ){
+			dispSq( j + 31 );
+			bbDisp( bb.passPwn[i][j] );
+			std::cout << (std::bitset<64>) bb.passPwn[i][j] << "\n";
+		}
+	}
+*/
 	
-	cout << "\"Black Rooks\"" << endl;
-	cout << (bitset<64>) blackRooks << endl;
-	cout << "\"Black Knights\"" << endl;
-	cout << (bitset<64>) blackKnights << endl;
-	cout << "\"Black Bishops\"" << endl;
-	cout << (bitset<64>) blackBishops << endl;
-	cout << "\"Black Queen\"" << endl;
-	cout << (bitset<64>) blackQueen << endl;
-	cout << "\"Black King\"" << endl;
-	cout << (bitset<64>) blackKing << endl;
-	cout << "\"Black Pawns\"" << endl;
-	cout << (bitset<64>) blackPawns << endl;
-	cout << "\"Black Pieces\"" << endl;
-	cout << (bitset<64>) blackPieces << endl;
-	nl(1);
 
-	cout << "\"Occupied Squares\"" << endl;
-	cout << (bitset<64>) occupiedSquares << endl;
 
-	cout << "\"Empty Squares\"" << endl;
-	cout << (bitset<64>) emptySquares << endl;
-*/	
 	/* Reverses bitboard and displays */
 /*     Reverse by 64 steps 	
 	U64 bbReverse = 0;
@@ -82,7 +89,7 @@ void bitboardDebug(){
 	}
 
 	nl(10);	
-	cout << (bitset<64>) bbReverse << endl;
+	std::cout << (std::bitset<64>) bbReverse << std::endl;
 */
 
 	/* Reverse bitboard faster */
@@ -121,31 +128,35 @@ void bitboardDebug(){
 		smallMod++;
 		bigMod--;
 	}	
-	cout << (bitset<64>) garbage << endl;
+	std::cout << (std::bitset<64>) garbage << std::endl;
 */
+}
+
+//Display bitboard in 8x8 configuration
+void bbDisp( U64 bb ){
 	/* Fills the display Array */
-/*
+
 	int displayArray[64];
 	U64 garbage;
-	garbage = whiteRooks;
+	garbage = bb;
 	int firstBit = 0;	
 	
-	for( int index = 0; index < 63; index++ ){
+	for( int index = 0; index < 64; index++ ){
 		firstBit = (garbage % 2 );
 		displayArray[index] = firstBit;
 		garbage >>= 1;
 	}
 
+	nl(1);
 	int count = 0;
 	for( int rank = RANK_8; rank >= RANK_1; rank-- ){
 		for( int file = FILE_A; file <= FILE_H; file++ )
 		{
 			count = FR2SQ64( file, rank );
-			cout << displayArray[count] << " ";	
+			std::cout << displayArray[count] << " ";	
 		}
 		nl(1);
 	} 
-*/	
 }
 
 /* Search Code (FCD) */
@@ -309,12 +320,14 @@ void debugEval(){
  * Search Code (FDA)		*/
 void debugAll(){
 	boardDebug();
-	//bitboardDebug();
 	debugVal();
 	debugColor();
 	debugType();
 	debugLife();
 	debugMove();
 	debugML();
+	debugEval();
+	bitboardDebug();
+	std::cout << "This is ply: " << ply << "\n";
 }
 
