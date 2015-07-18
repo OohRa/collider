@@ -20,7 +20,7 @@ bool slowFlag = false;
 bool genFlag = false;
 bool thinkFlag = false;
 int ply = 0;
-int grandDepth = 1;
+int grandDepth = 3;
 
 //FII
 /* Initialize index board */
@@ -224,6 +224,20 @@ void initialBitboards(){
 	bb.rank[RANK_6] = 0xFF0000000000;
 	bb.rank[RANK_7] = 0xFF000000000000;
 	bb.rank[RANK_8] = 0xFF00000000000000;
+
+	//Isolated pawn bitboards
+	bb.iso[FILE_A] = bb.file[FILE_B];
+	bb.iso[FILE_B] = bb.file[FILE_A] | bb.file[FILE_C];
+	bb.iso[FILE_C] = bb.file[FILE_B] | bb.file[FILE_D];
+	bb.iso[FILE_D] = bb.file[FILE_C] | bb.file[FILE_E];
+	bb.iso[FILE_E] = bb.file[FILE_D] | bb.file[FILE_F];
+	bb.iso[FILE_F] = bb.file[FILE_E] | bb.file[FILE_G];
+	bb.iso[FILE_G] = bb.file[FILE_F] | bb.file[FILE_H];
+	bb.iso[FILE_H] = bb.file[FILE_G];
+
+	//Outpost boards
+
+	
 	
 	//Passed pawn bitboard
 	int signs[3] = {0,1,-1};
